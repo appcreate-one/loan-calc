@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e3a5f">
+<title>Loan Calculator</title>
+<style>
+  <link rel="manifest" href="manifest.json">
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1e3a5f;
+    --blue: #2563eb;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --green: #15803d;
+    --red: #b91c1c;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 40px;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 18px 16px;
+    text-align: center;
+  }
+  header h1 { font-size: 20px; letter-spacing: 0.5px; }
+  header p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+  main { max-width: 520px; margin: 0 auto; padding: 14px; }
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card h2 {
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    margin-top: 10px;
+  }
+  label:first-of-type { margin-top: 0; }
+  input, select {
+    width: 100%;
+    font-size: 16px;
+    padding: 11px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text);
+    font-family: Arial, sans-serif;
+  }
+  input:focus, select:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--line);
+    font-size: 14px;
+    gap: 10px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row span:first-child { color: var(--muted); }
+  .row span:last-child { font-weight: bold; text-align: right; }
+  .row.total { border-top: 2px solid var(--navy); border-bottom: none; margin-top: 6px; padding-top: 10px; }
+  .row.total span { color: var(--navy); font-weight: bold; }
+  .row.key span:last-child { color: var(--blue); }
+  .neg span:last-child { color: var(--red); }
+  .pos span:last-child { color: var(--green); }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: #dbeafe;
+    color: var(--blue);
+    margin-left: 6px;
+    font-weight: normal;
+  }
+  .emi-box {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .emi-box small { font-size: 12px; opacity: 0.8; }
+  .emi-box div { font-size: 22px; font-weight: bold; margin-top: 2px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .two-col h3 { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  details summary {
+    font-size: 14px;
+    color: var(--blue);
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .note { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+  .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--line);
+    color: var(--text);
+    margin-top: 10px;
+    font-family: Arial, sans-serif;
+  }
+  @media (max-width: 380px) {
+    .two-col, .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LOAN CALCULATOR</h1>
+  <p id="today"></p>
+</header>
+
+<main>
+
+  <!-- INPUTS -->
+  <div class="card">
+    <h2>Enter Details</h2>
+    <label for="loan">Loan amount</label>
+    <input id="loan" type="number" inputmode="decimal" value="85000">
+
+    <label for="years">Term (years)</label>
+    <select id="years">
+      <option value="1">1 year</option>
+      <option value="2" selected>2 years</option>
+      <option value="3">3 years</option>
+    </select>
+
+    <label for="balance">Existing client: closing balance of old loan</label>
+    <input id="balance" type="number" inputmode="decimal" value="8505">
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card">
+    <details>
+      <summary>Rates and fees (tap to change)</summary>
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label for="rateEx">Existing rate (%/yr)</label>
+          <input id="rateEx" type="number" inputmode="decimal" value="24.2" step="0.01">
+        </div>
+        <div>
+          <label for="rateNew">New rate (%/yr)</label>
+          <input id="rateNew" type="number" inputmode="decimal" value="24.85" step="0.01">
+        </div>
+        <div>
+          <label for="pfEx">Existing PF (%)</label>
+          <input id="pfEx" type="number" inputmode="decimal" value="1" step="0.01">
+        </div>
+        <div>
+          <label for="pfNew">New PF (%)</label>
+          <input id="pfNew" type="number" inputmode="decimal" value="1.5" step="0.01">
+        </div>
+        <div>
+          <label for="gst">GST on PF (%)</label>
+          <input id="gst" type="number" inputmode="decimal" value="18" step="0.01">
+        </div>
+        <div>
+          <label for="ewiWeeks">Total EWI weeks</label>
+          <input id="ewiWeeks" type="number" inputmode="numeric" value="106">
+        </div>
+      </div>
+      <p class="note">Existing PF is charged on (loan amount - closing balance). New PF is charged on the full loan amount.</p>
+    </details>
+  </div>
+
+  <!-- SUMMARY: WEEKLY -->
+  <div class="card">
+    <h2>Weekly EMI</h2>
+    <div class="two-col">
+      <div>
+        <h3>Existing client</h3>
+        <div class="emi-box"><small>EMI / week</small><div id="emiEx">-</div></div>
+      </div>
+      <div>
+        <h3>New client</h3>
+        <div class="emi-box"><small>EMI / week</small><div id="emiNew">-</div></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="row"><span>4 weeks</span><span id="w4Ex">-</span></div>
+        <div class="row"><span>5 weeks</span><span id="w5Ex">-</span></div>
+        <div class="row"><span id="ewiLblEx">Total EWI</span><span id="ewiEx">-</span></div>
+        <div class="row key"><span>Extra amount</span><span id="extraEx">-</span></div>
+      </div>
+      <div>
+        <div class="row"><span>4 weeks</span><span id="w4New">-</span></div>
+        <div class="row"><span>5 weeks</span><span id="w5New">-</span></div>
+        <div class="row"><span id="ewiLblNew">Total EWI</span><span id="ewiNew">-</span></div>
+        <div class="row key"><span>Extra amount</span><span id="extraNew">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL: EXISTING -->
+  <div class="card">
+    <h2>Existing Client Details</h2>
+    <div class="row"><span>Loan amount</span><span id="exLoan">-</span></div>
+    <div class="row"><span>Insurance</span><span id="exIns">-</span></div>
+    <div class="row"><span>Hospital cover</span><span id="exHosp">-</span></div>
+    <div class="row"><span>Nat cat</span><span id="exNat">-</span></div>
+    <div class="row"><span>Processing fee (PF)</span><span id="exPf">-</span></div>
+    <div class="row"><span>GST on PF</span><span id="exGst">-</span></div>
+    <div class="row total"><span>Total deduction</span><span id="exDed">-</span></div>
+    <div class="row"><span>Credit (after deductions)</span><span id="exCredit">-</span></div>
+    <div class="row"><span>Old loan closing</span><span id="exClose">-</span></div>
+    <div class="row total"><span>Total credit to client</span><span id="exTotCredit">-</span></div>
+    <div class="row"><span>Total payment</span><span id="exTotPay">-</span></div>
+    <div class="row key"><span>Interest over term</span><span id="exInt">-</span></div>
+    <div class="row"><span>Credit without hospital</span><span id="exNoHosp">-</span></div>
+  </div>
+
+  <!-- DETAIL: NEW -->
+  <div class="card">
+    <h2>New Client Details</h2>
+    <div class="row"><span>Loan amount</span><span id="nwLoan">-</span></div>
+    <div class="row"><span>Insurance</span><span id="nwIns">-</span></div>
+    <div class="row"><span>Hospital cover</span><span id="nwHosp">-</span></div>
+    <div class="row"><span>Nat cat</span><span id="nwNat">-</span></div>
+    <div class="row"><span>Processing fee (PF)</span><span id="nwPf">-</span></div>
+    <div class="row"><span>GST on PF</span><span id="nwGst">-</span></div>
+    <div class="row total"><span>Total deduction</span><span id="nwDed">-</span></div>
+    <div class="row"><span>Credit (after deductions)</span><span id="nwCredit">-</span></div>
+    <div class="row total"><span>Total credit to client</span><span id="nwTotCredit">-</span></div>
+    <div class="row"><span>Total payment</span><span id="nwTotPay">-</span></div>
+    <div class="row key"><span>Interest over term</span><span id="nwInt">-</span></div>
+    <div class="row"><span>Credit without hospital</span><span id="nwNoHosp">-</span></div>
+  </div>
+
+  <button class="btn" id="reset">Reset to defaults</button>
+
+  <p class="note">Hospital cover and nat cat amounts by term: 1 yr = 1290 / 354, 2 yrs = 2190 / 708, 3 yrs = 3190 / 1062. Insurance = (10 + 20 x years) x loan / 1000. Figures are estimates based on the original spreadsheet.</p>
+</main>
+
+<script>
+  // Fixed charges by term, same as the spreadsheet
+  const HOSP = { 1: 1290, 2: 2190, 3: 3190 };
+  const NAT  = { 1: 354,  2: 708,  3: 1062 };
+
+  const $ = id => document.getElementById(id);
+  const num = id => parseFloat($(id).value) || 0;
+
+  const DEFAULTS = {
+    loan: 85000, years: "2", balance: 8505,
+    rateEx: 24.2, rateNew: 24.85, pfEx: 1, pfNew: 1.5, gst: 18, ewiWeeks: 106
+  };
+
+  function fmt(n) {
+    if (!isFinite(n)) return "-";
+    return "\u20B9" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // Weekly payment: same as Excel PMT(rate/52, years*52, loan)
+  function weeklyEmi(annualPct, years, principal) {
+    const r = annualPct / 100 / 52;
+    const n = years * 52;
+    if (n <= 0) return 0;
+    if (r === 0) return principal / n;
+    return principal * r / (1 - Math.pow(1 + r, -n));
+  }
+
+  function calc(type) {
+    const P = num("loan");
+    const y = parseInt($("years").value, 10);
+    const isEx = type === "ex";
+    const rate = isEx ? num("rateEx") : num("rateNew");
+    const pfPct = isEx ? num("pfEx") : num("pfNew");
+    const gstPct = num("gst");
+    const balance = isEx ? num("balance") : 0;
+
+    const emi = weeklyEmi(rate, y, P);
+    const ins = (10 + 20 * y) * (P / 1000);
+    const hosp = HOSP[y] || 0;
+    const nat = NAT[y] || 0;
+    // Existing: PF on top-up (loan minus old balance). New: PF on full loan.
+    const pfBase = isEx ? (P - balance) : P;
+    const pf = pfBase * pfPct / 100;
+    const gst = pf * gstPct / 100;
+
+    const deductions = ins + hosp + nat + pf + gst;
+    const credit = P - deductions;
+    const totCredit = isEx ? credit - balance : credit;
+    const totPay = emi * y * 52;
+    const interest = totPay - P;
+    const noHosp = totCredit + hosp;
+
+    const ewiWeeks = num("ewiWeeks");
+    const totalEwi = emi * ewiWeeks;
+
+    return {
+      P, emi, ins, hosp, nat, pf, gst, deductions, credit,
+      balance, totCredit, totPay, interest, noHosp,
+      w4: emi * 4, w5: emi * 5, totalEwi, extra: totalEwi - P
+    };
+  }
+
+  function setText(id, v) { $(id).textContent = v; }
+
+  function render() {
+    const ex = calc("ex");
+    const nw = calc("new");
+    const ewi = num("ewiWeeks");
+
+    // Weekly summary
+    setText("emiEx", fmt(ex.emi));
+    setText("emiNew", fmt(nw.emi));
+    setText("w4Ex", fmt(ex.w4));
+    setText("w5Ex", fmt(ex.w5));
+    setText("w4New", fmt(nw.w4));
+    setText("w5New", fmt(nw.w5));
+    setText("ewiLblEx", "Total EWI (" + ewi + " wks)");
+    setText("ewiLblNew", "Total EWI (" + ewi + " wks)");
+    setText("ewiEx", fmt(ex.totalEwi));
+    setText("ewiNew", fmt(nw.totalEwi));
+    setText("extraEx", fmt(ex.extra));
+    setText("extraNew", fmt(nw.extra));
+
+    // Existing detail
+    setText("exLoan", fmt(ex.P));
+    setText("exIns", fmt(ex.ins));
+    setText("exHosp", fmt(ex.hosp));
+    setText("exNat", fmt(ex.nat));
+    setText("exPf", fmt(ex.pf));
+    setText("exGst", fmt(ex.gst));
+    setText("exDed", fmt(ex.deductions));
+    setText("exCredit", fmt(ex.credit));
+    setText("exClose", fmt(ex.balance));
+    setText("exTotCredit", fmt(ex.totCredit));
+    setText("exTotPay", fmt(ex.totPay));
+    setText("exInt", fmt(ex.interest));
+    setText("exNoHosp", fmt(ex.noHosp));
+
+    // New detail
+    setText("nwLoan", fmt(nw.P));
+    setText("nwIns", fmt(nw.ins));
+    setText("nwHosp", fmt(nw.hosp));
+    setText("nwNat", fmt(nw.nat));
+    setText("nwPf", fmt(nw.pf));
+    setText("nwGst", fmt(nw.gst));
+    setText("nwDed", fmt(nw.deductions));
+    setText("nwCredit", fmt(nw.credit));
+    setText("nwTotCredit", fmt(nw.totCredit));
+    setText("nwTotPay", fmt(nw.totPay));
+    setText("nwInt", fmt(nw.interest));
+    setText("nwNoHosp", fmt(nw.noHosp));
+  }
+
+  function setDefaults() {
+    $("loan").value = DEFAULTS.loan;
+    $("years").value = DEFAULTS.years;
+    $("balance").value = DEFAULTS.balance;
+    $("rateEx").value = DEFAULTS.rateEx;
+    $("rateNew").value = DEFAULTS.rateNew;
+    $("pfEx").value = DEFAULTS.pfEx;
+    $("pfNew").value = DEFAULTS.pfNew;
+    $("gst").value = DEFAULTS.gst;
+    $("ewiWeeks").value = DEFAULTS.ewiWeeks;
+    render();
+  }
+
+  document.querySelectorAll("input, select").forEach(el => {
+    el.addEventListener("input", render);
+    el.addEventListener("change", render);
+  });
+  $("reset").addEventListener("click", setDefaults);
+
+  $("today").textContent = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric"
+  });
+
+  render();
+</script>
+</body>
+</html>
