@@ -2,402 +2,470 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1e3a5f">
+<link rel="manifest" href="manifest.json">
 <title>Loan Calculator</title>
 <style>
-  <link rel="manifest" href="manifest.json">
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy: #1e3a5f;
-    --blue: #2563eb;
-    --bg: #f1f5f9;
-    --card: #ffffff;
-    --text: #0f172a;
-    --muted: #64748b;
-    --line: #e2e8f0;
-    --green: #15803d;
-    --red: #b91c1c;
-  }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    padding-bottom: 40px;
-  }
-  header {
-    background: var(--navy);
-    color: #fff;
-    padding: 18px 16px;
-    text-align: center;
-  }
+  body { font-family: Arial, Helvetica, sans-serif; background: #f1f5f9; color: #0f172a; }
+  header { background: #1e3a5f; color: #fff; padding: 14px 16px; text-align: center; }
   header h1 { font-size: 20px; letter-spacing: 0.5px; }
-  header p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+  #clock { font-size: 13px; opacity: 0.9; margin-top: 6px; }
+  .tabs { display: flex; position: sticky; top: 0; z-index: 5; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+  .tab { flex: 1; padding: 14px 4px; border: none; background: none; font-size: 14px; color: #64748b; font-family: Arial, sans-serif; border-bottom: 3px solid transparent; }
+  .tab.active { color: #1e3a5f; font-weight: bold; border-bottom-color: #2563eb; }
   main { max-width: 520px; margin: 0 auto; padding: 14px; }
-  .card {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 14px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
-  .card h2 {
-    font-size: 15px;
-    color: var(--navy);
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--line);
-  }
-  label {
-    display: block;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    margin-top: 10px;
-  }
-  label:first-of-type { margin-top: 0; }
-  input, select {
-    width: 100%;
-    font-size: 16px;
-    padding: 11px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    background: #fff;
-    color: var(--text);
-    font-family: Arial, sans-serif;
-  }
-  input:focus, select:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card h2 { font-size: 15px; color: #1e3a5f; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
+  .card h3 { font-size: 14px; color: #1e3a5f; margin: 16px 0 4px; }
+  label { display: block; font-size: 13px; color: #64748b; margin: 10px 0 4px; }
+  input[type="text"], input[type="number"], input[type="tel"], select { width: 100%; font-size: 16px; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #0f172a; font-family: Arial, sans-serif; }
+  input:focus, select:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
+  .chk { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-size: 15px; color: #0f172a; }
+  .chk input { width: 18px; height: 18px; }
+  details summary { font-size: 14px; color: #2563eb; cursor: pointer; margin-top: 12px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 7px 0;
-    border-bottom: 1px dashed var(--line);
-    font-size: 14px;
-    gap: 10px;
-  }
+  .row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
   .row:last-child { border-bottom: none; }
-  .row span:first-child { color: var(--muted); }
+  .row span:first-child { color: #64748b; }
   .row span:last-child { font-weight: bold; text-align: right; }
-  .row.total { border-top: 2px solid var(--navy); border-bottom: none; margin-top: 6px; padding-top: 10px; }
-  .row.total span { color: var(--navy); font-weight: bold; }
-  .row.key span:last-child { color: var(--blue); }
-  .neg span:last-child { color: var(--red); }
-  .pos span:last-child { color: var(--green); }
-  .badge {
-    display: inline-block;
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 10px;
-    background: #dbeafe;
-    color: var(--blue);
-    margin-left: 6px;
-    font-weight: normal;
-  }
-  .emi-box {
-    background: var(--navy);
-    color: #fff;
-    border-radius: 10px;
-    padding: 12px;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  .emi-box small { font-size: 12px; opacity: 0.8; }
-  .emi-box div { font-size: 22px; font-weight: bold; margin-top: 2px; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .two-col h3 { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-  details summary {
-    font-size: 14px;
-    color: var(--blue);
-    cursor: pointer;
-    padding: 4px 0;
-  }
-  .note { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
-  .btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 15px;
-    border: none;
-    border-radius: 8px;
-    background: var(--line);
-    color: var(--text);
-    margin-top: 10px;
-    font-family: Arial, sans-serif;
+  .row.total { border-top: 2px solid #1e3a5f; border-bottom: none; margin-top: 6px; padding-top: 10px; }
+  .row.total span { color: #1e3a5f; }
+  .row.key span:last-child { color: #2563eb; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .btn { padding: 14px 4px; font-size: 15px; border: none; border-radius: 8px; background: #e2e8f0; color: #0f172a; font-family: Arial, sans-serif; font-weight: bold; }
+  .btn.wa { background: #25d366; color: #fff; }
+  .btn.pdf { background: #1e3a5f; color: #fff; }
+  .note { font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 10px; }
+  footer { text-align: center; font-size: 12px; color: #64748b; padding: 10px 0 24px; }
+  #printArea { display: none; }
+  @media print {
+    body > *:not(#printArea) { display: none !important; }
+    #printArea { display: block !important; padding: 20px; font-size: 13px; }
+    #printArea .row { border-bottom: 1px solid #ccc; }
   }
   @media (max-width: 380px) {
-    .two-col, .grid2 { grid-template-columns: 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>IGL LOAN CALCULATOR</h1>
-  <p id="today"></p>
-<h3> created by </h3>
-<h3> Rajesh A G </h3>
+  <h1>LOAN DETAILS</h1>
+  <div id="clock"></div>
 </header>
 
+<nav class="tabs">
+  <button class="tab active" data-tab="n">New Client</button>
+  <button class="tab" data-tab="e">Existing Client</button>
+  <button class="tab" data-tab="p">PD / GRT</button>
+</nav>
+
 <main>
-
-  <!-- INPUTS -->
-  <div class="card">
-    <h2>Enter Details</h2>
-    <label for="loan">Loan amount</label>
-    <input id="loan" type="number" inputmode="decimal" value="85000">
-
-    <label for="years">Term (years)</label>
-    <select id="years">
-      <option value="1">1 year</option>
-      <option value="2" selected>2 years</option>
-      <option value="3">3 years</option>
-    </select>
-
-    <label for="balance">Existing client: closing balance of old loan</label>
-    <input id="balance" type="number" inputmode="decimal" value="8505">
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="card">
-    <details>
-      <summary>Rates and fees (tap to change)</summary>
-      <div class="grid2" style="margin-top:10px">
-        <div>
-          <label for="rateEx">Existing rate (%/yr)</label>
-          <input id="rateEx" type="number" inputmode="decimal" value="24.2" step="0.01">
-        </div>
-        <div>
-          <label for="rateNew">New rate (%/yr)</label>
-          <input id="rateNew" type="number" inputmode="decimal" value="24.85" step="0.01">
-        </div>
-        <div>
-          <label for="pfEx">Existing PF (%)</label>
-          <input id="pfEx" type="number" inputmode="decimal" value="1" step="0.01">
-        </div>
-        <div>
-          <label for="pfNew">New PF (%)</label>
-          <input id="pfNew" type="number" inputmode="decimal" value="1.5" step="0.01">
-        </div>
-        <div>
-          <label for="gst">GST on PF (%)</label>
-          <input id="gst" type="number" inputmode="decimal" value="18" step="0.01">
-        </div>
-        <div>
-          <label for="ewiWeeks">Total EWI weeks</label>
-          <input id="ewiWeeks" type="number" inputmode="numeric" value="106">
-        </div>
-      </div>
-      <p class="note">Existing PF is charged on (loan amount - closing balance). New PF is charged on the full loan amount.</p>
-    </details>
-  </div>
-
-  <!-- SUMMARY: WEEKLY -->
-  <div class="card">
-    <h2>Weekly EMI</h2>
-    <div class="two-col">
-      <div>
-        <h3>Existing client</h3>
-        <div class="emi-box"><small>EMI / week</small><div id="emiEx">-</div></div>
-      </div>
-      <div>
-        <h3>New client</h3>
-        <div class="emi-box"><small>EMI / week</small><div id="emiNew">-</div></div>
-      </div>
-    </div>
-    <div class="two-col">
-      <div>
-        <div class="row"><span>4 weeks</span><span id="w4Ex">-</span></div>
-        <div class="row"><span>5 weeks</span><span id="w5Ex">-</span></div>
-        <div class="row"><span id="ewiLblEx">Total EWI</span><span id="ewiEx">-</span></div>
-        <div class="row key"><span>Extra amount</span><span id="extraEx">-</span></div>
-      </div>
-      <div>
-        <div class="row"><span>4 weeks</span><span id="w4New">-</span></div>
-        <div class="row"><span>5 weeks</span><span id="w5New">-</span></div>
-        <div class="row"><span id="ewiLblNew">Total EWI</span><span id="ewiNew">-</span></div>
-        <div class="row key"><span>Extra amount</span><span id="extraNew">-</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DETAIL: EXISTING -->
-  <div class="card">
-    <h2>Existing Client Details</h2>
-    <div class="row"><span>Loan amount</span><span id="exLoan">-</span></div>
-    <div class="row"><span>Insurance</span><span id="exIns">-</span></div>
-    <div class="row"><span>Hospital cover</span><span id="exHosp">-</span></div>
-    <div class="row"><span>Nat cat</span><span id="exNat">-</span></div>
-    <div class="row"><span>Processing fee (PF)</span><span id="exPf">-</span></div>
-    <div class="row"><span>GST on PF</span><span id="exGst">-</span></div>
-    <div class="row total"><span>Total deduction</span><span id="exDed">-</span></div>
-    <div class="row"><span>Credit (after deductions)</span><span id="exCredit">-</span></div>
-    <div class="row"><span>Old loan closing</span><span id="exClose">-</span></div>
-    <div class="row total"><span>Total credit to client</span><span id="exTotCredit">-</span></div>
-    <div class="row"><span>Total payment</span><span id="exTotPay">-</span></div>
-    <div class="row key"><span>Interest over term</span><span id="exInt">-</span></div>
-    <div class="row"><span>Credit without hospital</span><span id="exNoHosp">-</span></div>
-  </div>
-
-  <!-- DETAIL: NEW -->
-  <div class="card">
-    <h2>New Client Details</h2>
-    <div class="row"><span>Loan amount</span><span id="nwLoan">-</span></div>
-    <div class="row"><span>Insurance</span><span id="nwIns">-</span></div>
-    <div class="row"><span>Hospital cover</span><span id="nwHosp">-</span></div>
-    <div class="row"><span>Nat cat</span><span id="nwNat">-</span></div>
-    <div class="row"><span>Processing fee (PF)</span><span id="nwPf">-</span></div>
-    <div class="row"><span>GST on PF</span><span id="nwGst">-</span></div>
-    <div class="row total"><span>Total deduction</span><span id="nwDed">-</span></div>
-    <div class="row"><span>Credit (after deductions)</span><span id="nwCredit">-</span></div>
-    <div class="row total"><span>Total credit to client</span><span id="nwTotCredit">-</span></div>
-    <div class="row"><span>Total payment</span><span id="nwTotPay">-</span></div>
-    <div class="row key"><span>Interest over term</span><span id="nwInt">-</span></div>
-    <div class="row"><span>Credit without hospital</span><span id="nwNoHosp">-</span></div>
-  </div>
-
-  <button class="btn" id="reset">Reset to defaults</button>
-
-  <p class="note">Hospital cover and nat cat amounts by term: 1 yr = 1290 / 354, 2 yrs = 2190 / 708, 3 yrs = 3190 / 1062. Insurance = (10 + 20 x years) x loan / 1000. Figures are estimates based on the original spreadsheet.</p>
+  <section id="panel-n" class="panel active"></section>
+  <section id="panel-e" class="panel"></section>
+  <section id="panel-p" class="panel"></section>
 </main>
 
+<footer>Created by Rajesh A G</footer>
+
+<div id="printArea"></div>
+
 <script>
-  // Fixed charges by term, same as the spreadsheet
   const HOSP = { 1: 1290, 2: 2190, 3: 3190 };
   const NAT  = { 1: 354,  2: 708,  3: 1062 };
 
+  const VERIFY_OPTIONS = ["Ration card", "KSEB Bill", "Tax Receipt", "Other Documents"];
+  const INCOME_OPTIONS = ["Salaried", "Own business"];
+
   const $ = id => document.getElementById(id);
-  const num = id => parseFloat($(id).value) || 0;
 
-  const DEFAULTS = {
-    loan: 85000, years: "2", balance: 8505,
-    rateEx: 24.2, rateNew: 24.85, pfEx: 1, pfNew: 1.5, gst: 18, ewiWeeks: 106
-  };
-
-  function fmt(n) {
+  function money(n) {
     if (!isFinite(n)) return "-";
     return "\u20B9" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-
-  // Weekly payment: same as Excel PMT(rate/52, years*52, loan)
-  function weeklyEmi(annualPct, years, principal) {
-    const r = annualPct / 100 / 52;
-    const n = years * 52;
-    if (n <= 0) return 0;
-    if (r === 0) return principal / n;
-    return principal * r / (1 - Math.pow(1 + r, -n));
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function today() {
+    return new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  }
+  function nowTime() {
+    return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  }
+  function getChecks(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e => e.value);
+  }
+  function checkGroup(name, options) {
+    return options.map(o =>
+      `<label class="chk"><input type="checkbox" name="${name}" value="${o}"> ${o}</label>`
+    ).join("");
   }
 
-  function calc(type) {
-    const P = num("loan");
-    const y = parseInt($("years").value, 10);
-    const isEx = type === "ex";
-    const rate = isEx ? num("rateEx") : num("rateNew");
-    const pfPct = isEx ? num("pfEx") : num("pfNew");
-    const gstPct = num("gst");
-    const balance = isEx ? num("balance") : 0;
+  // Live date and time in the header
+  function tickClock() {
+    const d = new Date();
+    $("clock").textContent =
+      d.toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }) +
+      "  |  " +
+      d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
 
-    const emi = weeklyEmi(rate, y, P);
-    const ins = (10 + 20 * y) * (P / 1000);
-    const hosp = HOSP[y] || 0;
-    const nat = NAT[y] || 0;
-    // Existing: PF on top-up (loan minus old balance). New: PF on full loan.
-    const pfBase = isEx ? (P - balance) : P;
-    const pf = pfBase * pfPct / 100;
-    const gst = pf * gstPct / 100;
+  // ---------- LOAN PANELS ----------
+  function buildLoanPanel(t, title, isEx) {
+    return `
+    <div class="card">
+      <h2>${title}</h2>
+      <label>Client name</label>
+      <input id="${t}_name" type="text" placeholder="e.g. Sarath">
 
-    const deductions = ins + hosp + nat + pf + gst;
-    const credit = P - deductions;
-    const totCredit = isEx ? credit - balance : credit;
-    const totPay = emi * y * 52;
-    const interest = totPay - P;
-    const noHosp = totCredit + hosp;
+      <label>Relationship Officer name</label>
+      <input id="${t}_ro" type="text" placeholder="RO name">
 
-    const ewiWeeks = num("ewiWeeks");
-    const totalEwi = emi * ewiWeeks;
+      <label>Loan amount</label>
+      <input id="${t}_loan" type="number" inputmode="decimal" value="85000">
 
+      <label>Term</label>
+      <select id="${t}_years">
+        <option value="1">1 year</option>
+        <option value="2" selected>2 years</option>
+        <option value="3">3 years</option>
+      </select>
+
+      ${isEx ? `
+      <label>Closing balance of old loan</label>
+      <input id="${t}_balance" type="number" inputmode="decimal" value="8505">` : ""}
+
+      <details>
+        <summary>Rates and fees</summary>
+        <div class="grid2" style="margin-top:8px">
+          <div><label>Rate (%/yr)</label><input id="${t}_rate" type="number" inputmode="decimal" step="0.01" value="${isEx ? 24.2 : 24.85}"></div>
+          <div><label>PF (%)</label><input id="${t}_pf" type="number" inputmode="decimal" step="0.01" value="${isEx ? 1 : 1.5}"></div>
+          <div><label>GST on PF (%)</label><input id="${t}_gst" type="number" inputmode="decimal" step="0.01" value="18"></div>
+          <div><label>EWI weeks</label><input id="${t}_weeks" type="number" inputmode="numeric" value="106"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="card" id="${t}_result"></div>
+
+    <div class="actions">
+      <button class="btn wa" onclick="shareWA('${t}')">WhatsApp</button>
+      <button class="btn pdf" onclick="printLoan('${t}')">PDF</button>
+    </div>
+    <p class="note">PDF: tap PDF, then choose "Save as PDF" on the print screen. Then share the saved file in WhatsApp from Downloads.</p>`;
+  }
+
+  // ---------- PD / GRT PANEL ----------
+  function buildPdPanel() {
+    return `
+    <div class="card">
+      <h2>PD / GRT Details</h2>
+
+      <label>Relationship Officer name</label>
+      <input id="p_ro" type="text" placeholder="RO name">
+
+      <label>Product</label>
+      <select id="p_product">
+        <option value="IGL" selected>IGL</option>
+        <option value="IL">IL</option>
+        <option value="MSME">MSME</option>
+      </select>
+
+      <label>CLIENT name</label>
+      <input id="p_cname" type="text">
+
+      <label>CENTER No</label>
+      <input id="p_center" type="text">
+
+      <label>Cycle</label>
+      <input id="p_cycle" type="text" inputmode="numeric">
+
+      <label>Consent letter provided</label>
+      <select id="p_consent">
+        <option value="YES" selected>YES</option>
+        <option value="NO">NO</option>
+      </select>
+
+      <label>Existing arrear in center</label>
+      <select id="p_arrear">
+        <option value="YES">YES</option>
+        <option value="NO" selected>NO</option>
+      </select>
+
+      <label>IGL closing amount (if any)</label>
+      <input id="p_closing" type="text" inputmode="decimal" placeholder="Leave blank if none">
+
+      <label>Correct Place</label>
+      <input id="p_place" type="text">
+
+      <label>CLIENT Mobile number</label>
+      <input id="p_mobile" type="tel" inputmode="tel">
+
+      <label>Client available time</label>
+      <input id="p_avail" type="text" placeholder="e.g. 10:00 AM to 12:00 PM">
+
+      <h3>Home verification</h3>
+      <label>House type</label>
+      <select id="p_house">
+        <option value="Own house" selected>Own house</option>
+        <option value="Rent house">Rent house</option>
+      </select>
+
+      <label>How to verify</label>
+      ${checkGroup("verify", VERIFY_OPTIONS)}
+
+      <label>House vintage stability (years)</label>
+      <input id="p_vintage" type="number" inputmode="numeric" min="0" placeholder="e.g. 5">
+
+      <h3>Income verification</h3>
+      ${checkGroup("income", INCOME_OPTIONS)}
+
+      <h3>Centre details</h3>
+      <label>CENTRE LEADER NAME</label>
+      <input id="p_leader" type="text">
+
+      <label>CENTRE LEADER phone number</label>
+      <input id="p_leaderPhone" type="tel" inputmode="tel">
+    </div>
+
+    <div class="actions">
+      <button class="btn wa" onclick="sharePdWA()">WhatsApp</button>
+      <button class="btn pdf" onclick="printPd()">PDF</button>
+    </div>
+    <p class="note">PDF: tap PDF, then choose "Save as PDF" on the print screen. Then share the saved file in WhatsApp from Downloads.</p>`;
+  }
+
+  $("panel-n").innerHTML = buildLoanPanel("n", "New Client", false);
+  $("panel-e").innerHTML = buildLoanPanel("e", "Existing Client", true);
+  $("panel-p").innerHTML = buildPdPanel();
+
+  // ---------- LOAN CALCULATIONS ----------
+  function getInputs(t) {
+    const v = id => $(t + "_" + id);
     return {
-      P, emi, ins, hosp, nat, pf, gst, deductions, credit,
-      balance, totCredit, totPay, interest, noHosp,
-      w4: emi * 4, w5: emi * 5, totalEwi, extra: totalEwi - P
+      type: t,
+      name: v("name").value.trim(),
+      ro: v("ro").value.trim(),
+      loan: parseFloat(v("loan").value) || 0,
+      years: parseInt(v("years").value, 10),
+      balance: t === "e" ? (parseFloat(v("balance").value) || 0) : 0,
+      rate: parseFloat(v("rate").value) || 0,
+      pfPct: parseFloat(v("pf").value) || 0,
+      gstPct: parseFloat(v("gst").value) || 0,
+      weeks: parseFloat(v("weeks").value) || 0
     };
   }
 
-  function setText(id, v) { $(id).textContent = v; }
-
-  function render() {
-    const ex = calc("ex");
-    const nw = calc("new");
-    const ewi = num("ewiWeeks");
-
-    // Weekly summary
-    setText("emiEx", fmt(ex.emi));
-    setText("emiNew", fmt(nw.emi));
-    setText("w4Ex", fmt(ex.w4));
-    setText("w5Ex", fmt(ex.w5));
-    setText("w4New", fmt(nw.w4));
-    setText("w5New", fmt(nw.w5));
-    setText("ewiLblEx", "Total EWI (" + ewi + " wks)");
-    setText("ewiLblNew", "Total EWI (" + ewi + " wks)");
-    setText("ewiEx", fmt(ex.totalEwi));
-    setText("ewiNew", fmt(nw.totalEwi));
-    setText("extraEx", fmt(ex.extra));
-    setText("extraNew", fmt(nw.extra));
-
-    // Existing detail
-    setText("exLoan", fmt(ex.P));
-    setText("exIns", fmt(ex.ins));
-    setText("exHosp", fmt(ex.hosp));
-    setText("exNat", fmt(ex.nat));
-    setText("exPf", fmt(ex.pf));
-    setText("exGst", fmt(ex.gst));
-    setText("exDed", fmt(ex.deductions));
-    setText("exCredit", fmt(ex.credit));
-    setText("exClose", fmt(ex.balance));
-    setText("exTotCredit", fmt(ex.totCredit));
-    setText("exTotPay", fmt(ex.totPay));
-    setText("exInt", fmt(ex.interest));
-    setText("exNoHosp", fmt(ex.noHosp));
-
-    // New detail
-    setText("nwLoan", fmt(nw.P));
-    setText("nwIns", fmt(nw.ins));
-    setText("nwHosp", fmt(nw.hosp));
-    setText("nwNat", fmt(nw.nat));
-    setText("nwPf", fmt(nw.pf));
-    setText("nwGst", fmt(nw.gst));
-    setText("nwDed", fmt(nw.deductions));
-    setText("nwCredit", fmt(nw.credit));
-    setText("nwTotCredit", fmt(nw.totCredit));
-    setText("nwTotPay", fmt(nw.totPay));
-    setText("nwInt", fmt(nw.interest));
-    setText("nwNoHosp", fmt(nw.noHosp));
+  // Same logic as the original spreadsheet
+  function calc(p) {
+    const P = p.loan, y = p.years, isEx = p.type === "e";
+    const r = p.rate / 100 / 52, n = y * 52;
+    const emi = n <= 0 ? 0 : (r === 0 ? P / n : P * r / (1 - Math.pow(1 + r, -n)));
+    const ins = (10 + 20 * y) * (P / 1000);
+    const hosp = HOSP[y] || 0;
+    const nat = NAT[y] || 0;
+    const bal = p.balance;
+    const pf = (isEx ? (P - bal) : P) * p.pfPct / 100;
+    const gst = pf * p.gstPct / 100;
+    const ded = ins + hosp + nat + pf + gst;
+    const credit = P - ded;
+    const totCredit = credit - (isEx ? bal : 0);
+    const totPay = emi * n;
+    const totalEwi = emi * p.weeks;
+    return { emi, ins, hosp, nat, pf, gst, ded, credit, totCredit, totPay,
+             interest: totPay - P, w4: emi * 4, w5: emi * 5, totalEwi, extra: totalEwi - P };
   }
 
-  function setDefaults() {
-    $("loan").value = DEFAULTS.loan;
-    $("years").value = DEFAULTS.years;
-    $("balance").value = DEFAULTS.balance;
-    $("rateEx").value = DEFAULTS.rateEx;
-    $("rateNew").value = DEFAULTS.rateNew;
-    $("pfEx").value = DEFAULTS.pfEx;
-    $("pfNew").value = DEFAULTS.pfNew;
-    $("gst").value = DEFAULTS.gst;
-    $("ewiWeeks").value = DEFAULTS.ewiWeeks;
-    render();
+  function titleOf(p) {
+    return p.type === "e" ? "Existing Client" : "New Client";
   }
+
+  // Full detail for the screen
+  function fullRows(p, r) {
+    const rows = [
+      ["Loan amount", money(p.loan)],
+      ["Term", p.years + (p.years === 1 ? " year" : " years")],
+      ["Weekly EMI", money(r.emi), "key"],
+      ["Insurance", money(r.ins)],
+      ["Hospital cover", money(r.hosp)],
+      ["Nat cat", money(r.nat)],
+      ["Processing fee (PF)", money(r.pf)],
+      ["GST on PF", money(r.gst)],
+      ["Total deduction", money(r.ded), "total"]
+    ];
+    if (p.type === "e") rows.push(["Old loan closing", money(p.balance)]);
+    rows.push(
+      ["Credit to client", money(r.totCredit), "total"],
+      ["Total payment", money(r.totPay)],
+      ["Interest over term", money(r.interest), "key"],
+      ["4 weeks EMI", money(r.w4)],
+      ["5 weeks EMI", money(r.w5)],
+      ["Total EWI (" + p.weeks + " weeks)", money(r.totalEwi)],
+      ["Extra amount", money(r.extra), "key"]
+    );
+    return rows;
+  }
+
+  // Only these lines go in the WhatsApp / PDF share
+  function shareRows(p, r) {
+    const rows = [
+      ["Loan amount", money(p.loan)],
+      ["Term", p.years + (p.years === 1 ? " year" : " years")],
+      ["Weekly EMI", money(r.emi)],
+      ["Insurance", money(r.ins)],
+      ["Hospital cover", money(r.hosp)],
+      ["Nat cat", money(r.nat)],
+      ["Processing fee (PF)", money(r.pf)],
+      ["GST on PF", money(r.gst)],
+      ["Total deduction", money(r.ded)]
+    ];
+    if (p.type === "e") rows.push(["Old loan closing", money(p.balance)]);
+    rows.push(["Credit to client", money(r.totCredit)]);
+    return rows;
+  }
+
+  function resultHTML(p, r) {
+    let h = `<h2>${titleOf(p)} - Result</h2>`;
+    if (p.name) h += `<div class="row"><span>Client</span><span>${esc(p.name)}</span></div>`;
+    if (p.ro) h += `<div class="row"><span>Relationship Officer</span><span>${esc(p.ro)}</span></div>`;
+    fullRows(p, r).forEach(([label, value, cls]) => {
+      h += `<div class="row ${cls || ""}"><span>${label}</span><span>${value}</span></div>`;
+    });
+    return h;
+  }
+
+  function loanText(p, r) {
+    const lines = ["*LOAN DETAILS - " + titleOf(p) + "*"];
+    if (p.name) lines.push("Client: " + p.name);
+    if (p.ro) lines.push("Relationship Officer: " + p.ro);
+    lines.push("Date: " + today());
+    lines.push("Time: " + nowTime());
+    lines.push("");
+    shareRows(p, r).forEach(([label, value]) => lines.push(label + ": " + value));
+    return lines.join("\n");
+  }
+
+  function renderLoan(t) {
+    const p = getInputs(t);
+    $(t + "_result").innerHTML = resultHTML(p, calc(p));
+  }
+
+  function shareWA(t) {
+    const p = getInputs(t);
+    openWA(loanText(p, calc(p)));
+  }
+
+  function printLoan(t) {
+    const p = getInputs(t);
+    const r = calc(p);
+    printHTML(printHeader() + resultHTML(p, r));
+  }
+
+  // ---------- PD / GRT ----------
+  function getPd() {
+    const v = id => $(id).value.trim();
+    const verify = getChecks("verify");
+    const income = getChecks("income");
+    return {
+      ro: v("p_ro"), product: v("p_product"), cname: v("p_cname"), center: v("p_center"),
+      cycle: v("p_cycle"), consent: v("p_consent"), arrear: v("p_arrear"),
+      closing: v("p_closing"), place: v("p_place"), mobile: v("p_mobile"),
+      avail: v("p_avail"), house: v("p_house"),
+      verify: verify.length ? verify.join(", ") : "",
+      vintage: v("p_vintage"),
+      income: income.length ? income.join(", ") : "",
+      leader: v("p_leader"), leaderPhone: v("p_leaderPhone")
+    };
+  }
+
+  function pdRows(d) {
+    return [
+      ["Relationship Officer name", d.ro || "-"],
+      ["Product", d.product || "-"],
+      ["CLIENT name", d.cname || "-"],
+      ["CENTER No", d.center || "-"],
+      ["Cycle", d.cycle || "-"],
+      ["Consent letter provided", d.consent],
+      ["EXISTING ARREAR IN CENTER", d.arrear],
+      ["IGL CLOSING AMOUNT IF ANY", d.closing || "-"],
+      ["Correct Place", d.place || "-"],
+      ["CLIENT Mobile number", d.mobile || "-"],
+      ["Client available time", d.avail || "-"],
+      ["Home verification", d.house],
+      ["How to verify", d.verify || "-"],
+      ["House vintage stability", d.vintage ? d.vintage + " years" : "-"],
+      ["Income verification", d.income || "-"],
+      ["CENTRE LEADER NAME", d.leader || "-"],
+      ["CENTRE LEADER phone number", d.leaderPhone || "-"]
+    ];
+  }
+
+  function pdText(d) {
+    const lines = ["*PD / GRT DETAILS*", "Date: " + today(), "Time: " + nowTime(), ""];
+    pdRows(d).forEach(([label, value]) => lines.push(label + ": " + value));
+    return lines.join("\n");
+  }
+
+  function pdHTML(d) {
+    let h = `<h2>PD / GRT Details</h2>`;
+    pdRows(d).forEach(([label, value]) => {
+      h += `<div class="row"><span>${label}</span><span>${esc(value)}</span></div>`;
+    });
+    return h;
+  }
+
+  function sharePdWA() {
+    openWA(pdText(getPd()));
+  }
+
+  function printPd() {
+    printHTML(printHeader() + pdHTML(getPd()));
+  }
+
+  // ---------- SHARE HELPERS ----------
+  function printHeader() {
+    return `<div style="text-align:center;margin-bottom:12px">
+      <strong>LOAN CALCULATOR</strong><br>
+      <small>${today()}  ${nowTime()}</small><br>
+      <small>Created by Rajesh</small>
+    </div>`;
+  }
+
+  function openWA(text) {
+    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+  }
+
+  function printHTML(html) {
+    $("printArea").innerHTML = html;
+    window.print();
+  }
+
+  // ---------- TABS & LIVE UPDATE ----------
+  document.querySelectorAll(".tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      $("panel-" + btn.dataset.tab).classList.add("active");
+    });
+  });
 
   document.querySelectorAll("input, select").forEach(el => {
-    el.addEventListener("input", render);
-    el.addEventListener("change", render);
-  });
-  $("reset").addEventListener("click", setDefaults);
-
-  $("today").textContent = new Date().toLocaleDateString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric"
+    const prefix = el.id ? el.id.split("_")[0] : "";
+    const update = () => { if (prefix === "n" || prefix === "e") renderLoan(prefix); };
+    el.addEventListener("input", update);
+    el.addEventListener("change", update);
   });
 
-  render();
+  renderLoan("n");
+  renderLoan("e");
 </script>
 </body>
 </html>
