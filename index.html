@@ -5,29 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1e3a5f">
 <link rel="manifest" href="manifest.json">
-<title>Loan Calculator</title>
+<title>Loan Details</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, Helvetica, sans-serif; background: #f1f5f9; color: #0f172a; }
-  header { background: #1e3a5f; color: #fff; padding: 14px 16px; text-align: center; }
+  body { font-family: Arial, Helvetica, sans-serif; background: #eef2ff; color: #0f172a; }
+
+  header { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; padding: 14px 16px; text-align: center; }
   header h1 { font-size: 20px; letter-spacing: 0.5px; }
-  #clock { font-size: 13px; opacity: 0.9; margin-top: 6px; }
-  .tabs { display: flex; position: sticky; top: 0; z-index: 5; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-  .tab { flex: 1; padding: 14px 4px; border: none; background: none; font-size: 14px; color: #64748b; font-family: Arial, sans-serif; border-bottom: 3px solid transparent; }
-  .tab.active { color: #1e3a5f; font-weight: bold; border-bottom-color: #2563eb; }
-  main { max-width: 520px; margin: 0 auto; padding: 14px; }
+  #clock { font-size: 13px; opacity: 0.95; margin-top: 6px; }
+  #who { font-size: 13px; margin-top: 8px; }
+  #who button { margin-left: 10px; padding: 4px 10px; font-size: 12px; border: 1px solid #fff; background: none; color: #fff; border-radius: 6px; font-family: Arial, sans-serif; }
+
+  /* Tabs as buttons */
+  .tabs { display: flex; gap: 6px; padding: 10px; position: sticky; top: 0; z-index: 5; background: #eef2ff; overflow-x: auto; }
+  .tab { flex: 1; min-width: 88px; padding: 11px 6px; border: none; border-radius: 999px; background: #fff; color: #1e3a5f; font-size: 14px; font-weight: bold; font-family: Arial, sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,0.12); white-space: nowrap; }
+  .tab.active { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
+
+  main { max-width: 520px; margin: 0 auto; padding: 4px 14px 14px; }
   .panel { display: none; }
   .panel.active { display: block; }
-  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  .card h2 { font-size: 15px; color: #1e3a5f; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
-  .card h3 { font-size: 14px; color: #1e3a5f; margin: 16px 0 4px; }
-  label { display: block; font-size: 13px; color: #64748b; margin: 10px 0 4px; }
-  input[type="text"], input[type="number"], input[type="tel"], select { width: 100%; font-size: 16px; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #0f172a; font-family: Arial, sans-serif; }
+
+  .card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+  .card h2 { font-size: 15px; color: #1e3a5f; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e0e7ff; }
+  .card h3 { font-size: 14px; color: #2563eb; margin: 16px 0 4px; }
+  label { display: block; font-size: 13px; color: #475569; margin: 10px 0 4px; font-weight: bold; }
+  input[type="text"], input[type="number"], input[type="tel"], input[type="password"], select { width: 100%; font-size: 16px; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; color: #0f172a; font-family: Arial, sans-serif; }
   input:focus, select:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
-  .chk { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-size: 15px; color: #0f172a; }
+  .chk { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-size: 15px; color: #0f172a; font-weight: normal; }
   .chk input { width: 18px; height: 18px; }
-  details summary { font-size: 14px; color: #2563eb; cursor: pointer; margin-top: 12px; }
+  details summary { font-size: 14px; color: #2563eb; cursor: pointer; margin-top: 12px; font-weight: bold; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Segment button groups (Yes/No, tenure) */
+  .seg { display: flex; gap: 8px; margin: 4px 0 6px; }
+  .seg button { flex: 1; padding: 11px 6px; border: 2px solid #c7d2fe; background: #eef2ff; color: #1e3a5f; border-radius: 10px; font-size: 15px; font-weight: bold; font-family: Arial, sans-serif; }
+  .seg button.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+
   .row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
   .row:last-child { border-bottom: none; }
   .row span:first-child { color: #64748b; }
@@ -35,11 +48,45 @@
   .row.total { border-top: 2px solid #1e3a5f; border-bottom: none; margin-top: 6px; padding-top: 10px; }
   .row.total span { color: #1e3a5f; }
   .row.key span:last-child { color: #2563eb; }
+
   .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  .btn { padding: 14px 4px; font-size: 15px; border: none; border-radius: 8px; background: #e2e8f0; color: #0f172a; font-family: Arial, sans-serif; font-weight: bold; }
-  .btn.wa { background: #25d366; color: #fff; }
-  .btn.pdf { background: #1e3a5f; color: #fff; }
+  .btn { padding: 14px 4px; font-size: 15px; border: none; border-radius: 10px; background: #e2e8f0; color: #0f172a; font-family: Arial, sans-serif; font-weight: bold; }
+  .btn.wa { background: linear-gradient(135deg, #16a34a, #25d366); color: #fff; }
+  .btn.pdf { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
+  .btn.save { background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; width: 100%; margin-bottom: 10px; }
+  .btn.full { width: 100%; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; margin-top: 14px; }
+  .btn.alt { background: #e0e7ff; color: #1e3a5f; margin-top: 10px; }
+  .btn.sync { width: 100%; margin-top: 0; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
   .note { font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 10px; }
+  .msg { font-size: 13px; margin-top: 10px; min-height: 16px; }
+  .err { color: #b91c1c; }
+  .ok { color: #15803d; }
+
+  /* Colourful dashboard */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat { border-radius: 14px; padding: 16px 8px; text-align: center; color: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+  .stat .num { font-size: 28px; font-weight: bold; }
+  .stat .lbl { font-size: 12px; margin-top: 4px; opacity: 0.95; }
+  .s1 { background: linear-gradient(135deg, #16a34a, #4ade80); }
+  .s2 { background: linear-gradient(135deg, #0d9488, #2dd4bf); }
+  .s3 { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+  .s4 { background: linear-gradient(135deg, #7c3aed, #c084fc); }
+  .rec { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px; margin-bottom: 8px; border-radius: 10px; background: #f8fafc; border-left: 5px solid #2563eb; font-size: 14px; }
+  .rec.GRT { border-left-color: #16a34a; }
+  .rec small { color: #64748b; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; margin-left: 4px; color: #fff; }
+  .badge.GRT { background: #16a34a; }
+  .badge.PD { background: #2563eb; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; color: #fff; font-weight: bold; margin-top: 4px; }
+  .pill.Pending { background: #f59e0b; }
+  .pill.Verified { background: #2563eb; }
+  .pill.Completed { background: #16a34a; }
+  .pill.nosync { background: #64748b; }
+  .del { padding: 6px 10px; font-size: 12px; border: none; border-radius: 6px; background: #fee2e2; color: #b91c1c; font-family: Arial, sans-serif; }
+
+  /* Result card */
+  .result-card h2 { color: #1e3a5f; }
+
   footer { text-align: center; font-size: 12px; color: #64748b; padding: 10px 0 24px; }
   #printArea { display: none; }
   @media print {
@@ -49,27 +96,40 @@
   }
   @media (max-width: 380px) {
     .grid2 { grid-template-columns: 1fr; }
+    .tab { font-size: 12px; min-width: 76px; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>LOAN DETAILS</h1>
+  <h1>HAPPY TO HELP</h1>
   <div id="clock"></div>
+  <div id="who"></div>
 </header>
 
-<nav class="tabs">
-  <button class="tab active" data-tab="n">New Client</button>
-  <button class="tab" data-tab="e">Existing Client</button>
-  <button class="tab" data-tab="p">PD / GRT</button>
-</nav>
+<!-- LOGIN / SIGN UP -->
+<div id="loginScreen">
+  <main>
+    <div class="card" id="loginBox" style="margin-top:14px"></div>
+  </main>
+</div>
 
-<main>
-  <section id="panel-n" class="panel active"></section>
-  <section id="panel-e" class="panel"></section>
-  <section id="panel-p" class="panel"></section>
-</main>
+<!-- APP -->
+<div id="appScreen" style="display:none">
+  <nav class="tabs">
+    <button class="tab active" data-tab="dash">Dashboard</button>
+    <button class="tab" data-tab="n">New Client</button>
+    <button class="tab" data-tab="e">Existing</button>
+    <button class="tab" data-tab="p">PD / GRT</button>
+  </nav>
+  <main>
+    <section id="panel-dash" class="panel active"></section>
+    <section id="panel-n" class="panel"></section>
+    <section id="panel-e" class="panel"></section>
+    <section id="panel-p" class="panel"></section>
+  </main>
+</div>
 
 <footer>Created by Rajesh A G</footer>
 
@@ -78,9 +138,17 @@
 <script>
   const HOSP = { 1: 1290, 2: 2190, 3: 3190 };
   const NAT  = { 1: 354,  2: 708,  3: 1062 };
-
   const VERIFY_OPTIONS = ["Ration card", "KSEB Bill", "Tax Receipt", "Other Documents"];
   const INCOME_OPTIONS = ["Salaried", "Own business"];
+
+  const ACCS_KEY = "loancalc_accounts";
+  const ACC_KEY = "loancalc_account";   // old single-account key, migrated automatically
+  const REC_KEY = "loancalc_records";
+  const SESS_KEY = "loancalc_session";  // holds the logged-in staff name for this session
+
+  // ---- SYNC SETTINGS: paste your values here ----
+  const SYNC_URL = "PASTE_WEB_APP_URL_HERE";
+  const SYNC_KEY = "CHANGE-ME-SYNC-KEY";
 
   const $ = id => document.getElementById(id);
 
@@ -97,6 +165,12 @@
   function nowTime() {
     return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
   }
+  function todayKey() {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + mm + "-" + dd;
+  }
   function getChecks(name) {
     return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e => e.value);
   }
@@ -104,6 +178,15 @@
     return options.map(o =>
       `<label class="chk"><input type="checkbox" name="${name}" value="${o}"> ${o}</label>`
     ).join("");
+  }
+
+  // Segment button group bound to a hidden input
+  function segGroup(targetId, options, selected) {
+    const btns = options.map(o =>
+      `<button type="button" data-v="${o.v}" class="${o.v === selected ? "on" : ""}">${o.label}</button>`
+    ).join("");
+    return `<div class="seg" data-target="${targetId}">${btns}</div>
+            <input type="hidden" id="${targetId}" value="${selected}">`;
   }
 
   // Live date and time in the header
@@ -116,6 +199,186 @@
   }
   tickClock();
   setInterval(tickClock, 1000);
+
+  // ---------- STORAGE ----------
+  function getAccounts() {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(ACCS_KEY)) || []; } catch (e) { list = []; }
+    // Migrate the single account from the previous version
+    if (!list.length) {
+      try {
+        const old = JSON.parse(localStorage.getItem(ACC_KEY));
+        if (old && old.staff) {
+          list = [old];
+          localStorage.setItem(ACCS_KEY, JSON.stringify(list));
+        }
+      } catch (e) {}
+    }
+    return list;
+  }
+  function saveAccounts(list) {
+    localStorage.setItem(ACCS_KEY, JSON.stringify(list));
+  }
+  // The staff member logged in on this session, or null
+  function currentAccount() {
+    const s = sessionStorage.getItem(SESS_KEY);
+    if (!s) return null;
+    return getAccounts().find(a => a.staff.toLowerCase() === s.toLowerCase()) || null;
+  }
+  function getRecords() {
+    try { return JSON.parse(localStorage.getItem(REC_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveRecords(list) {
+    localStorage.setItem(REC_KEY, JSON.stringify(list));
+  }
+
+  // ---------- LOGIN & SIGN UP ----------
+  function renderLogin(mode) {
+    const accounts = getAccounts();
+    const signup = mode === "signup" || accounts.length === 0;
+
+    if (signup) {
+      $("loginBox").innerHTML = `
+        <h2>${accounts.length ? "Sign up" : "Create Login"}</h2>
+        <p class="note">Enter your branch and staff details. Next time, log in with your staff name and password.</p>
+        <label>Branch name</label>
+        <input id="l_branch" type="text">
+        <label>Staff name</label>
+        <input id="l_staff" type="text">
+        <label>Password</label>
+        <input id="l_pass" type="password">
+        <label>Confirm password</label>
+        <input id="l_pass2" type="password">
+        <button class="btn full" onclick="createAccount()">Create account</button>
+        ${accounts.length ? `<button class="btn alt" style="width:100%" onclick="renderLogin('login')">Back to login</button>` : ""}
+        <div id="l_msg" class="msg err"></div>`;
+    } else {
+      $("loginBox").innerHTML = `
+        <h2>Login</h2>
+        <label>Staff name</label>
+        <input id="l_staffIn" type="text">
+        <label>Password</label>
+        <input id="l_passIn" type="password">
+        <button class="btn full" onclick="loginNow()">Login</button>
+        <button class="btn alt" style="width:100%" onclick="renderLogin('signup')">Sign up (new staff)</button>
+        <div id="l_msg" class="msg err"></div>`;
+    }
+  }
+
+  function createAccount() {
+    const branch = $("l_branch").value.trim();
+    const staff = $("l_staff").value.trim();
+    const pass = $("l_pass").value;
+    const pass2 = $("l_pass2").value;
+    const msg = $("l_msg");
+    const accounts = getAccounts();
+
+    if (!branch || !staff) { msg.textContent = "Enter branch name and staff name."; return; }
+    if (pass.length < 4) { msg.textContent = "Password must be at least 4 characters."; return; }
+    if (pass !== pass2) { msg.textContent = "Passwords do not match."; return; }
+    if (accounts.some(a => a.staff.toLowerCase() === staff.toLowerCase())) {
+      msg.textContent = "This staff name is already signed up. Please log in.";
+      return;
+    }
+    accounts.push({ branch, staff, pass });
+    saveAccounts(accounts);
+    startSession(staff);
+  }
+
+  function loginNow() {
+    const staff = $("l_staffIn").value.trim();
+    const pass = $("l_passIn").value;
+    const acc = getAccounts().find(a => a.staff.toLowerCase() === staff.toLowerCase());
+    if (!acc || acc.pass !== pass) {
+      $("l_msg").textContent = "Wrong staff name or password.";
+      return;
+    }
+    startSession(acc.staff);
+  }
+
+  function startSession(staff) {
+    sessionStorage.setItem(SESS_KEY, staff);
+    showApp();
+  }
+
+  function logout() {
+    sessionStorage.removeItem(SESS_KEY);
+    $("who").innerHTML = "";
+    $("appScreen").style.display = "none";
+    $("loginScreen").style.display = "block";
+    renderLogin("login");
+  }
+
+  function showApp() {
+    const acc = currentAccount();
+    if (!acc) { logout(); return; }
+    $("loginScreen").style.display = "none";
+    $("appScreen").style.display = "block";
+    $("who").innerHTML = `Branch: ${esc(acc.branch)} &nbsp;|&nbsp; Staff: ${esc(acc.staff)}
+      <button onclick="logout()">Logout</button>`;
+    ["n_ro", "e_ro", "p_ro"].forEach(id => {
+      if (!$(id).value) $(id).value = acc.staff;
+    });
+    renderLoan("n");
+    renderLoan("e");
+    renderDashboard();
+    setTab("dash");
+  }
+
+  function setTab(name) {
+    document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + name));
+  }
+
+  // ---------- DASHBOARD ----------
+  function renderDashboard() {
+    const me = currentAccount();
+    const recs = getRecords().filter(r => !r.staff || (me && r.staff === me.staff));
+    const t = todayKey();
+    const count = (type, onlyToday) =>
+      recs.filter(r => r.type === type && (!onlyToday || r.date === t)).length;
+
+    let html = `
+      <div class="card">
+        <button class="btn sync" onclick="syncAll()">Sync and refresh status</button>
+        <div id="syncMsg" class="msg"></div>
+      </div>
+      <div class="stats">
+        <div class="stat s1"><div class="num">${count("GRT", true)}</div><div class="lbl">Today GRT</div></div>
+        <div class="stat s2"><div class="num">${count("GRT", false)}</div><div class="lbl">Total GRT</div></div>
+        <div class="stat s3"><div class="num">${count("PD", true)}</div><div class="lbl">Today PD</div></div>
+        <div class="stat s4"><div class="num">${count("PD", false)}</div><div class="lbl">Total PD</div></div>
+      </div>
+      <div class="card">
+        <h2>Recent records</h2>`;
+
+    const latest = recs.slice().sort((a, b) => b.id - a.id).slice(0, 10);
+    if (latest.length === 0) {
+      html += `<p class="note">No records saved yet. Save a GRT or PD from the PD / GRT tab.</p>`;
+    } else {
+      latest.forEach(r => {
+        html += `
+          <div class="rec ${r.type}">
+            <div>
+              <strong>${esc(r.data.cname || "-")}</strong>
+              <span class="badge ${r.type}">${r.type}</span><br>
+              <small>${esc(r.data.center || "-")} | ${r.date} ${r.time}</small><br>
+              <small>RO: ${esc(r.ro || "-")}</small><br>
+              <span class="pill ${r.status || "Pending"}">${r.status || "Pending"}</span>${r.synced ? "" : ' <span class="pill nosync">Not synced</span>'}
+            </div>
+            <button class="del" onclick="deleteRecord(${r.id})">Delete</button>
+          </div>`;
+      });
+    }
+    html += `</div>`;
+    $("panel-dash").innerHTML = html;
+  }
+
+  function deleteRecord(id) {
+    if (!confirm("Delete this record?")) return;
+    saveRecords(getRecords().filter(r => r.id !== id));
+    renderDashboard();
+  }
 
   // ---------- LOAN PANELS ----------
   function buildLoanPanel(t, title, isEx) {
@@ -131,12 +394,15 @@
       <label>Loan amount</label>
       <input id="${t}_loan" type="number" inputmode="decimal" value="85000">
 
-      <label>Term</label>
-      <select id="${t}_years">
-        <option value="1">1 year</option>
-        <option value="2" selected>2 years</option>
-        <option value="3">3 years</option>
-      </select>
+      <label>Tenure</label>
+      ${segGroup(t + "_years", [
+        { v: 1, label: "1 year" }, { v: 2, label: "2 years" }, { v: 3, label: "3 years" }
+      ], 2)}
+
+      <label>Hospital insurance</label>
+      ${segGroup(t + "_hosp", [
+        { v: "yes", label: "Yes" }, { v: "no", label: "No" }
+      ], "yes")}
 
       ${isEx ? `
       <label>Closing balance of old loan</label>
@@ -153,7 +419,7 @@
       </details>
     </div>
 
-    <div class="card" id="${t}_result"></div>
+    <div class="card result-card" id="${t}_result"></div>
 
     <div class="actions">
       <button class="btn wa" onclick="shareWA('${t}')">WhatsApp</button>
@@ -167,6 +433,12 @@
     return `
     <div class="card">
       <h2>PD / GRT Details</h2>
+
+      <label>Record type</label>
+      <select id="p_type">
+        <option value="GRT" selected>GRT</option>
+        <option value="PD">PD</option>
+      </select>
 
       <label>Relationship Officer name</label>
       <input id="p_ro" type="text" placeholder="RO name">
@@ -235,7 +507,10 @@
       <input id="p_leaderPhone" type="tel" inputmode="tel">
     </div>
 
-    <div class="actions">
+    <button class="btn save" onclick="savePdRecord()">Save record</button>
+    <div id="p_msg" class="msg"></div>
+
+    <div class="actions" style="margin-top:14px">
       <button class="btn wa" onclick="sharePdWA()">WhatsApp</button>
       <button class="btn pdf" onclick="printPd()">PDF</button>
     </div>
@@ -254,7 +529,8 @@
       name: v("name").value.trim(),
       ro: v("ro").value.trim(),
       loan: parseFloat(v("loan").value) || 0,
-      years: parseInt(v("years").value, 10),
+      years: parseInt($(t + "_years").value, 10),
+      hosp: $(t + "_hosp").value === "yes",
       balance: t === "e" ? (parseFloat(v("balance").value) || 0) : 0,
       rate: parseFloat(v("rate").value) || 0,
       pfPct: parseFloat(v("pf").value) || 0,
@@ -269,7 +545,7 @@
     const r = p.rate / 100 / 52, n = y * 52;
     const emi = n <= 0 ? 0 : (r === 0 ? P / n : P * r / (1 - Math.pow(1 + r, -n)));
     const ins = (10 + 20 * y) * (P / 1000);
-    const hosp = HOSP[y] || 0;
+    const hosp = p.hosp ? (HOSP[y] || 0) : 0;
     const nat = NAT[y] || 0;
     const bal = p.balance;
     const pf = (isEx ? (P - bal) : P) * p.pfPct / 100;
@@ -287,11 +563,11 @@
     return p.type === "e" ? "Existing Client" : "New Client";
   }
 
-  // Full detail for the screen
   function fullRows(p, r) {
     const rows = [
       ["Loan amount", money(p.loan)],
-      ["Term", p.years + (p.years === 1 ? " year" : " years")],
+      ["Tenure", p.years + (p.years === 1 ? " year" : " years")],
+      ["Hospital insurance", p.hosp ? "Yes" : "No"],
       ["Weekly EMI", money(r.emi), "key"],
       ["Insurance", money(r.ins)],
       ["Hospital cover", money(r.hosp)],
@@ -318,6 +594,7 @@
     const rows = [
       ["Loan amount", money(p.loan)],
       ["Term", p.years + (p.years === 1 ? " year" : " years")],
+      ["Hospital insurance", p.hosp ? "Yes" : "No"],
       ["Weekly EMI", money(r.emi)],
       ["Insurance", money(r.ins)],
       ["Hospital cover", money(r.hosp)],
@@ -421,6 +698,36 @@
     return h;
   }
 
+  function savePdRecord() {
+    const d = getPd();
+    const type = $("p_type").value;
+    const msg = $("p_msg");
+    const me = currentAccount();
+    if (!d.cname) {
+      msg.className = "msg err";
+      msg.textContent = "Enter CLIENT name before saving.";
+      return;
+    }
+    const recs = getRecords();
+    recs.push({ id: Date.now(), type: type, date: todayKey(), time: nowTime(),
+                branch: me.branch, staff: me.staff, ro: d.ro,
+                status: "Pending", synced: false, data: d });
+    saveRecords(recs);
+
+    msg.className = "msg ok";
+    msg.textContent = "Saved " + type + " record for " + d.cname + " (" + today() + ")";
+    clearPdClient();
+    renderDashboard();
+    syncPending().then(res => { renderDashboard(); msg.textContent += " | " + res; });
+  }
+
+  // Clear client-specific fields after saving; keep RO, product and type
+  function clearPdClient() {
+    ["p_cname", "p_center", "p_cycle", "p_closing", "p_place", "p_mobile",
+     "p_avail", "p_vintage", "p_leader", "p_leaderPhone"].forEach(id => $(id).value = "");
+    document.querySelectorAll('input[name="verify"], input[name="income"]').forEach(c => c.checked = false);
+  }
+
   function sharePdWA() {
     openWA(pdText(getPd()));
   }
@@ -432,9 +739,9 @@
   // ---------- SHARE HELPERS ----------
   function printHeader() {
     return `<div style="text-align:center;margin-bottom:12px">
-      <strong>LOAN CALCULATOR</strong><br>
+      <strong>LOAN DETAILS</strong><br>
       <small>${today()}  ${nowTime()}</small><br>
-      <small>Created by Rajesh</small>
+      <small>Created by Rajesh A G</small>
     </div>`;
   }
 
@@ -447,16 +754,78 @@
     window.print();
   }
 
-  // ---------- TABS & LIVE UPDATE ----------
-  document.querySelectorAll(".tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-      btn.classList.add("active");
-      $("panel-" + btn.dataset.tab).classList.add("active");
+  // ---------- SYNC WITH GOOGLE SHEET ----------
+  function syncConfigured() {
+    return SYNC_URL && !SYNC_URL.startsWith("PASTE");
+  }
+
+  async function postJSON(payload) {
+    const res = await fetch(SYNC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
     });
+    return res.json();
+  }
+
+  // Upload every record not yet on the sheet
+  async function syncPending() {
+    if (!syncConfigured()) return "Sync not set up yet";
+    const recs = getRecords();
+    let ok = 0, fail = 0;
+    for (const r of recs) {
+      if (r.synced) continue;
+      try {
+        const res = await postJSON({ action: "save", key: SYNC_KEY, record: r });
+        if (res.ok) { r.synced = true; ok++; } else { fail++; }
+      } catch (e) { fail++; }
+    }
+    saveRecords(recs);
+    return "Uploaded " + ok + (fail ? ", " + fail + " failed (will retry)" : "");
+  }
+
+  // Get latest Pending / Verified / Completed status from the sheet
+  async function refreshStatuses() {
+    if (!syncConfigured()) return "";
+    try {
+      const res = await (await fetch(SYNC_URL + "?action=statuses&key=" + encodeURIComponent(SYNC_KEY))).json();
+      if (!res.ok) return "Status error: " + res.error;
+      const recs = getRecords();
+      recs.forEach(r => { const s = res.statuses[String(r.id)]; if (s) r.status = s; });
+      saveRecords(recs);
+      return "Status updated";
+    } catch (e) {
+      return "Could not get status (check internet)";
+    }
+  }
+
+  async function syncAll() {
+    const a = await syncPending();
+    const b = await refreshStatuses();
+    renderDashboard();
+    const m = $("syncMsg");
+    m.className = "msg ok";
+    m.textContent = a + ". " + b;
+  }
+
+  // ---------- EVENTS ----------
+  document.querySelectorAll(".tab").forEach(btn => {
+    btn.addEventListener("click", () => setTab(btn.dataset.tab));
   });
 
+  // Segment buttons (tenure, hospital insurance)
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".seg button");
+    if (!b) return;
+    const seg = b.parentElement;
+    const hid = $(seg.dataset.target);
+    hid.value = String(b.dataset.v);
+    seg.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+    const prefix = hid.id.split("_")[0];
+    if (prefix === "n" || prefix === "e") renderLoan(prefix);
+  });
+
+  // Live update for text and number inputs
   document.querySelectorAll("input, select").forEach(el => {
     const prefix = el.id ? el.id.split("_")[0] : "";
     const update = () => { if (prefix === "n" || prefix === "e") renderLoan(prefix); };
@@ -464,8 +833,13 @@
     el.addEventListener("change", update);
   });
 
-  renderLoan("n");
-  renderLoan("e");
+  // ---------- START ----------
+  if (currentAccount()) {
+    showApp();
+  } else {
+    $("loginScreen").style.display = "block";
+    renderLogin();
+  }
 </script>
 </body>
 </html>
