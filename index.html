@@ -16,7 +16,6 @@
   #who { font-size: 13px; margin-top: 8px; }
   #who button { margin-left: 10px; padding: 4px 10px; font-size: 12px; border: 1px solid #fff; background: none; color: #fff; border-radius: 6px; font-family: Arial, sans-serif; }
 
-  /* Tabs as buttons */
   .tabs { display: flex; gap: 6px; padding: 10px; position: sticky; top: 0; z-index: 5; background: #eef2ff; overflow-x: auto; }
   .tab { flex: 1; min-width: 88px; padding: 11px 6px; border: none; border-radius: 999px; background: #fff; color: #1e3a5f; font-size: 14px; font-weight: bold; font-family: Arial, sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,0.12); white-space: nowrap; }
   .tab.active { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
@@ -36,7 +35,6 @@
   details summary { font-size: 14px; color: #2563eb; cursor: pointer; margin-top: 12px; font-weight: bold; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  /* Segment button groups (Yes/No, tenure) */
   .seg { display: flex; gap: 8px; margin: 4px 0 6px; }
   .seg button { flex: 1; padding: 11px 6px; border: 2px solid #c7d2fe; background: #eef2ff; color: #1e3a5f; border-radius: 10px; font-size: 15px; font-weight: bold; font-family: Arial, sans-serif; }
   .seg button.on { background: #2563eb; border-color: #2563eb; color: #fff; }
@@ -55,14 +53,12 @@
   .btn.pdf { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
   .btn.save { background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; width: 100%; margin-bottom: 10px; }
   .btn.full { width: 100%; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; margin-top: 14px; }
-  .btn.alt { background: #e0e7ff; color: #1e3a5f; margin-top: 10px; }
-  .btn.sync { width: 100%; margin-top: 0; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
+  .btn.sync { width: 100%; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
   .note { font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 10px; }
   .msg { font-size: 13px; margin-top: 10px; min-height: 16px; }
   .err { color: #b91c1c; }
   .ok { color: #15803d; }
 
-  /* Colourful dashboard */
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
   .stat { border-radius: 14px; padding: 16px 8px; text-align: center; color: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
   .stat .num { font-size: 28px; font-weight: bold; }
@@ -84,9 +80,6 @@
   .pill.nosync { background: #64748b; }
   .del { padding: 6px 10px; font-size: 12px; border: none; border-radius: 6px; background: #fee2e2; color: #b91c1c; font-family: Arial, sans-serif; }
 
-  /* Result card */
-  .result-card h2 { color: #1e3a5f; }
-
   footer { text-align: center; font-size: 12px; color: #64748b; padding: 10px 0 24px; }
   #printArea { display: none; }
   @media print {
@@ -103,12 +96,12 @@
 <body>
 
 <header>
-  <h1>HAPPY TO HELP</h1>
+  <h1>LOAN DETAILS</h1>
   <div id="clock"></div>
   <div id="who"></div>
 </header>
 
-<!-- LOGIN / SIGN UP -->
+<!-- LOGIN -->
 <div id="loginScreen">
   <main>
     <div class="card" id="loginBox" style="margin-top:14px"></div>
@@ -141,14 +134,11 @@
   const VERIFY_OPTIONS = ["Ration card", "KSEB Bill", "Tax Receipt", "Other Documents"];
   const INCOME_OPTIONS = ["Salaried", "Own business"];
 
-  const ACCS_KEY = "loancalc_accounts";
-  const ACC_KEY = "loancalc_account";   // old single-account key, migrated automatically
   const REC_KEY = "loancalc_records";
-  const SESS_KEY = "loancalc_session";  // holds the logged-in staff name for this session
+  const SESS_KEY = "loancalc_session";  // logged-in staff: token, branch, staff, role
 
-  // ---- SYNC SETTINGS: paste your values here ----
+  // Only the web app URL goes here. No passwords or keys are stored in this app.
   const SYNC_URL = "https://script.google.com/macros/s/AKfycbzqmIFTtcSparnOWYNaV5gEVErWukFISVKxNPpZ4hp9MgXPGIdAULoU-jVgGtqrGFUy/exec";
-  const SYNC_KEY = "Sync-Loan-2026";
 
   const $ = id => document.getElementById(id);
 
@@ -179,8 +169,6 @@
       `<label class="chk"><input type="checkbox" name="${name}" value="${o}"> ${o}</label>`
     ).join("");
   }
-
-  // Segment button group bound to a hidden input
   function segGroup(targetId, options, selected) {
     const btns = options.map(o =>
       `<button type="button" data-v="${o.v}" class="${o.v === selected ? "on" : ""}">${o.label}</button>`
@@ -200,30 +188,9 @@
   tickClock();
   setInterval(tickClock, 1000);
 
-  // ---------- STORAGE ----------
-  function getAccounts() {
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem(ACCS_KEY)) || []; } catch (e) { list = []; }
-    // Migrate the single account from the previous version
-    if (!list.length) {
-      try {
-        const old = JSON.parse(localStorage.getItem(ACC_KEY));
-        if (old && old.staff) {
-          list = [old];
-          localStorage.setItem(ACCS_KEY, JSON.stringify(list));
-        }
-      } catch (e) {}
-    }
-    return list;
-  }
-  function saveAccounts(list) {
-    localStorage.setItem(ACCS_KEY, JSON.stringify(list));
-  }
-  // The staff member logged in on this session, or null
+  // ---------- SESSION & STORAGE ----------
   function currentAccount() {
-    const s = sessionStorage.getItem(SESS_KEY);
-    if (!s) return null;
-    return getAccounts().find(a => a.staff.toLowerCase() === s.toLowerCase()) || null;
+    try { return JSON.parse(sessionStorage.getItem(SESS_KEY)); } catch (e) { return null; }
   }
   function getRecords() {
     try { return JSON.parse(localStorage.getItem(REC_KEY)) || []; } catch (e) { return []; }
@@ -231,73 +198,44 @@
   function saveRecords(list) {
     localStorage.setItem(REC_KEY, JSON.stringify(list));
   }
-
-  // ---------- LOGIN & SIGN UP ----------
-  function renderLogin(mode) {
-    const accounts = getAccounts();
-    const signup = mode === "signup" || accounts.length === 0;
-
-    if (signup) {
-      $("loginBox").innerHTML = `
-        <h2>${accounts.length ? "Sign up" : "Create Login"}</h2>
-        <p class="note">Enter your branch and staff details. Next time, log in with your staff name and password.</p>
-        <label>Branch name</label>
-        <input id="l_branch" type="text">
-        <label>Staff name</label>
-        <input id="l_staff" type="text">
-        <label>Password</label>
-        <input id="l_pass" type="password">
-        <label>Confirm password</label>
-        <input id="l_pass2" type="password">
-        <button class="btn full" onclick="createAccount()">Create account</button>
-        ${accounts.length ? `<button class="btn alt" style="width:100%" onclick="renderLogin('login')">Back to login</button>` : ""}
-        <div id="l_msg" class="msg err"></div>`;
-    } else {
-      $("loginBox").innerHTML = `
-        <h2>Login</h2>
-        <label>Staff name</label>
-        <input id="l_staffIn" type="text">
-        <label>Password</label>
-        <input id="l_passIn" type="password">
-        <button class="btn full" onclick="loginNow()">Login</button>
-        <button class="btn alt" style="width:100%" onclick="renderLogin('signup')">Sign up (new staff)</button>
-        <div id="l_msg" class="msg err"></div>`;
-    }
+  function syncConfigured() {
+    return SYNC_URL && !SYNC_URL.startsWith("PASTE");
   }
 
-  function createAccount() {
+  // ---------- LOGIN ----------
+  function renderLogin() {
+    $("loginBox").innerHTML = `
+      <h2>Login</h2>
+      <p class="note">Use the branch name, staff name and password given by your branch admin.</p>
+      <label>Branch name</label>
+      <input id="l_branch" type="text">
+      <label>Staff name</label>
+      <input id="l_staff" type="text">
+      <label>Password</label>
+      <input id="l_pass" type="password">
+      <button class="btn full" onclick="loginNow()">Login</button>
+      <div id="l_msg" class="msg err"></div>`;
+  }
+
+  async function loginNow() {
+    const msg = $("l_msg");
+    msg.className = "msg err";
+    if (!syncConfigured()) { msg.textContent = "App is not connected to the server yet."; return; }
     const branch = $("l_branch").value.trim();
     const staff = $("l_staff").value.trim();
-    const pass = $("l_pass").value;
-    const pass2 = $("l_pass2").value;
-    const msg = $("l_msg");
-    const accounts = getAccounts();
-
-    if (!branch || !staff) { msg.textContent = "Enter branch name and staff name."; return; }
-    if (pass.length < 4) { msg.textContent = "Password must be at least 4 characters."; return; }
-    if (pass !== pass2) { msg.textContent = "Passwords do not match."; return; }
-    if (accounts.some(a => a.staff.toLowerCase() === staff.toLowerCase())) {
-      msg.textContent = "This staff name is already signed up. Please log in.";
-      return;
+    const password = $("l_pass").value;
+    if (!branch || !staff || !password) { msg.textContent = "Fill in all fields."; return; }
+    try {
+      const res = await postJSON({ action: "login", branch: branch, staff: staff, password: password });
+      if (!res.ok) { msg.textContent = res.error; return; }
+      startSession({ token: res.token, branch: res.branch, staff: res.staff, role: res.role });
+    } catch (e) {
+      msg.textContent = "No internet or server error. Try again.";
     }
-    accounts.push({ branch, staff, pass });
-    saveAccounts(accounts);
-    startSession(staff);
   }
 
-  function loginNow() {
-    const staff = $("l_staffIn").value.trim();
-    const pass = $("l_passIn").value;
-    const acc = getAccounts().find(a => a.staff.toLowerCase() === staff.toLowerCase());
-    if (!acc || acc.pass !== pass) {
-      $("l_msg").textContent = "Wrong staff name or password.";
-      return;
-    }
-    startSession(acc.staff);
-  }
-
-  function startSession(staff) {
-    sessionStorage.setItem(SESS_KEY, staff);
+  function startSession(acc) {
+    sessionStorage.setItem(SESS_KEY, JSON.stringify(acc));
     showApp();
   }
 
@@ -306,7 +244,7 @@
     $("who").innerHTML = "";
     $("appScreen").style.display = "none";
     $("loginScreen").style.display = "block";
-    renderLogin("login");
+    renderLogin();
   }
 
   function showApp() {
@@ -375,7 +313,7 @@
   }
 
   function deleteRecord(id) {
-    if (!confirm("Delete this record?")) return;
+    if (!confirm("Delete this record from this phone? (It stays on the sheet.)")) return;
     saveRecords(getRecords().filter(r => r.id !== id));
     renderDashboard();
   }
@@ -419,7 +357,7 @@
       </details>
     </div>
 
-    <div class="card result-card" id="${t}_result"></div>
+    <div class="card" id="${t}_result"></div>
 
     <div class="actions">
       <button class="btn wa" onclick="shareWA('${t}')">WhatsApp</button>
@@ -520,6 +458,7 @@
   $("panel-n").innerHTML = buildLoanPanel("n", "New Client", false);
   $("panel-e").innerHTML = buildLoanPanel("e", "Existing Client", true);
   $("panel-p").innerHTML = buildPdPanel();
+  renderLogin();
 
   // ---------- LOAN CALCULATIONS ----------
   function getInputs(t) {
@@ -754,11 +693,7 @@
     window.print();
   }
 
-  // ---------- SYNC WITH GOOGLE SHEET ----------
-  function syncConfigured() {
-    return SYNC_URL && !SYNC_URL.startsWith("PASTE");
-  }
-
+  // ---------- SYNC WITH SERVER ----------
   async function postJSON(payload) {
     const res = await fetch(SYNC_URL, {
       method: "POST",
@@ -768,28 +703,38 @@
     return res.json();
   }
 
-  // Upload every record not yet on the sheet
+  function sessionExpired(res) {
+    return res && res.error && /log in again/i.test(res.error);
+  }
+
+  // Upload every record not yet on the server
   async function syncPending() {
     if (!syncConfigured()) return "Sync not set up yet";
+    const me = currentAccount();
+    if (!me) return "Please log in";
     const recs = getRecords();
-    let ok = 0, fail = 0;
+    let ok = 0, fail = 0, expired = false;
     for (const r of recs) {
       if (r.synced) continue;
       try {
-        const res = await postJSON({ action: "save", key: SYNC_KEY, record: r });
-        if (res.ok) { r.synced = true; ok++; } else { fail++; }
+        const res = await postJSON({ action: "save", token: me.token, record: r });
+        if (res.ok) { r.synced = true; ok++; }
+        else { fail++; if (sessionExpired(res)) expired = true; }
       } catch (e) { fail++; }
     }
     saveRecords(recs);
+    if (expired) return "Session expired. Logout and login again";
     return "Uploaded " + ok + (fail ? ", " + fail + " failed (will retry)" : "");
   }
 
-  // Get latest Pending / Verified / Completed status from the sheet
+  // Latest Pending / Verified / Completed status for your own records
   async function refreshStatuses() {
     if (!syncConfigured()) return "";
+    const me = currentAccount();
+    if (!me) return "";
     try {
-      const res = await (await fetch(SYNC_URL + "?action=statuses&key=" + encodeURIComponent(SYNC_KEY))).json();
-      if (!res.ok) return "Status error: " + res.error;
+      const res = await (await fetch(SYNC_URL + "?action=statuses&token=" + encodeURIComponent(me.token))).json();
+      if (!res.ok) return sessionExpired(res) ? "Session expired. Logout and login again" : "Status error: " + res.error;
       const recs = getRecords();
       recs.forEach(r => { const s = res.statuses[String(r.id)]; if (s) r.status = s; });
       saveRecords(recs);
@@ -838,7 +783,6 @@
     showApp();
   } else {
     $("loginScreen").style.display = "block";
-    renderLogin();
   }
 </script>
 </body>
