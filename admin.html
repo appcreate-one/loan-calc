@@ -16,11 +16,17 @@
   .card.Pending { border-left-color: #f59e0b; }
   .card.Verified { border-left-color: #2563eb; }
   .card.Completed { border-left-color: #16a34a; }
+  .card.plain { border-left-color: #4c1d95; }
+  .card h2 { font-size: 16px; color: #4c1d95; margin-bottom: 8px; }
   label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin: 10px 0 4px; }
   input { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; }
   .btn { padding: 13px 8px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; color: #fff; background: linear-gradient(135deg, #4c1d95, #db2777); font-family: Arial, sans-serif; }
   .btn.full { width: 100%; margin-top: 14px; }
   .msg { font-size: 13px; color: #b91c1c; margin-top: 10px; min-height: 16px; }
+  .msg.ok { color: #15803d; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tabs button { flex: 1; padding: 10px 4px; border: none; border-radius: 999px; background: #fff; color: #4c1d95; font-weight: bold; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); font-family: Arial, sans-serif; }
+  .tabs button.on { background: linear-gradient(135deg, #4c1d95, #db2777); color: #fff; }
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
   .stat { border-radius: 12px; padding: 10px 4px; text-align: center; color: #fff; }
   .stat .n { font-size: 22px; font-weight: bold; }
@@ -42,11 +48,12 @@
   .btns { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
   .btns button { padding: 9px 2px; border: none; border-radius: 8px; font-weight: bold; font-size: 11px; background: #ede9fe; color: #4c1d95; font-family: Arial, sans-serif; }
   .btns button.cur { background: #4c1d95; color: #fff; }
-  .btns button.details { background: #fce7f3; color: #9d174d; }
+  .btns button.files { background: #fce7f3; color: #9d174d; }
   .det { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 8px; }
   .det div { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px dotted #eee; font-size: 13px; }
   .det div span:first-child { color: #64748b; }
   .det div span:last-child { font-weight: bold; text-align: right; }
+  .staff { padding: 8px 0; border-bottom: 1px dashed #e9d5ff; font-size: 15px; font-weight: bold; }
   @media (max-width: 380px) { .stats { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
@@ -58,26 +65,40 @@
   <div id="who"></div>
 </header>
 
+<!-- LOGIN -->
 <div class="wrap" id="loginView">
-  <div class="card" style="border-left-color:#4c1d95">
-    <h2 style="font-size:16px;color:#4c1d95">Admin login</h2>
-    <label>Your name</label>
+  <div class="card plain">
+    <h2>Branch admin login</h2>
+    <label>Branch name</label>
+    <input id="aBranch" type="text">
+    <label>Admin name</label>
     <input id="aName" type="text">
-    <label>Admin password</label>
+    <label>Password</label>
     <input id="aPass" type="password">
     <button class="btn full" onclick="login()">Login</button>
     <div id="aMsg" class="msg"></div>
   </div>
 </div>
 
+<!-- APP -->
 <div class="wrap" id="appView" style="display:none">
-  <div class="stats" id="stats"></div>
-  <div class="filters" id="filters"></div>
-  <div id="list"></div>
+  <div class="tabs">
+    <button id="tabRec" class="on" onclick="setTab('rec')">Records</button>
+    <button id="tabStaff" onclick="setTab('staff')">RO Staff</button>
+    <button onclick="location.reload()">Logout</button>
+  </div>
+
+  <div id="recView">
+    <div class="stats" id="stats"></div>
+    <div class="filters" id="filters"></div>
+    <div id="list"></div>
+  </div>
+
+  <div id="staffView" style="display:none"></div>
 </div>
 
 <script>
-  // Same web app URL as in index.html
+  // Only the web app URL goes here. No keys are stored in this page.
   const SYNC_URL = "https://script.google.com/macros/s/AKfycbzqmIFTtcSparnOWYNaV5gEVErWukFISVKxNPpZ4hp9MgXPGIdAULoU-jVgGtqrGFUy/exec";
 
   const LABELS = {
@@ -88,7 +109,7 @@
     leader: "Centre leader", leaderPhone: "Leader phone"
   };
 
-  let adminKey = "Admin-Rajesh-2026", adminName = "Rajesh", records = [], filter = "All";
+  let token = "", me = null, records = [], staffList = [], filter = "All", tab = "rec";
   const $ = id => document.getElementById(id);
 
   function esc(s) {
@@ -102,36 +123,75 @@
   clock();
   setInterval(clock, 30000);
 
-  async function loadRecords() {
+  // Server calls
+  async function post(payload) {
     if (SYNC_URL.startsWith("PASTE")) throw new Error("Set SYNC_URL in admin.html first.");
-    const res = await (await fetch(SYNC_URL + "?action=list&key=" + encodeURIComponent(adminKey))).json();
-    if (!res.ok) throw new Error(res.error);
-    records = res.records;
+    const res = await fetch(SYNC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+  async function get(params) {
+    const q = Object.entries(params).map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+    return (await fetch(SYNC_URL + "?" + q)).json();
   }
 
+  // Login
   async function login() {
-    adminKey = $("aPass").value;
-    adminName = $("aName").value.trim();
-    if (!adminName || !adminKey) { $("aMsg").textContent = "Enter your name and password."; return; }
+    const branch = $("aBranch").value.trim();
+    const staff = $("aName").value.trim();
+    const password = $("aPass").value;
+    $("aMsg").className = "msg";
+    if (!branch || !staff || !password) { $("aMsg").textContent = "Fill in all fields."; return; }
     try {
-      await loadRecords();
+      const res = await post({ action: "login", branch: branch, staff: staff, password: password });
+      if (!res.ok) { $("aMsg").textContent = res.error; return; }
+      if (res.role !== "ADMIN") { $("aMsg").textContent = "This login is not a branch admin account."; return; }
+      token = res.token;
+      me = res;
+      await loadAll();
       $("loginView").style.display = "none";
       $("appView").style.display = "block";
-      $("who").textContent = "Admin: " + adminName;
-      render();
+      $("who").textContent = "Branch: " + me.branch + "  |  Admin: " + me.staff;
+      setTab("rec");
     } catch (e) {
-      $("aMsg").textContent = "Could not login: " + e.message;
+      $("aMsg").textContent = e.message || "Could not connect. Check internet.";
     }
   }
 
+  async function loadAll() {
+    const r = await get({ action: "list", token: token });
+    if (!r.ok) throw new Error(r.error);
+    records = r.records;
+    const s = await get({ action: "staff", token: token });
+    if (!s.ok) throw new Error(s.error);
+    staffList = s.staff;
+  }
+
   async function refresh() {
-    try { await loadRecords(); render(); }
+    try { await loadAll(); render(); }
     catch (e) { alert("Refresh failed: " + e.message); }
   }
 
-  function setFilter(f) { filter = f; render(); }
+  function setTab(name) {
+    tab = name;
+    $("tabRec").classList.toggle("on", name === "rec");
+    $("tabStaff").classList.toggle("on", name === "staff");
+    $("recView").style.display = name === "rec" ? "block" : "none";
+    $("staffView").style.display = name === "staff" ? "block" : "none";
+    if (name === "rec") renderRecords(); else renderStaff();
+  }
 
   function render() {
+    if (tab === "rec") renderRecords(); else renderStaff();
+  }
+
+  // ---------- RECORDS ----------
+  function setFilter(f) { filter = f; renderRecords(); }
+
+  function renderRecords() {
     const c = { Pending: 0, Verified: 0, Completed: 0 };
     records.forEach(r => { const s = r.Status || "Pending"; c[s] = (c[s] || 0) + 1; });
 
@@ -147,7 +207,7 @@
       `<button onclick="refresh()">Refresh</button>`;
 
     const list = records.filter(r => filter === "All" || (r.Status || "Pending") === filter);
-    $("list").innerHTML = list.length ? list.map(card).join("") : `<div class="card">No records.</div>`;
+    $("list").innerHTML = list.length ? list.map(card).join("") : `<div class="card plain">No records.</div>`;
   }
 
   function card(r) {
@@ -155,16 +215,15 @@
     const d = rec.data || {};
     const st = r.Status || "Pending";
     const id = String(r.ID);
-    const type = rec.type || "";
-    const ro = rec.ro || d.ro || "-";
+    const type = rec.type || r.Type || "";
+    const ro = rec.ro || d.ro || r.Staff || "-";
 
     const btn = s => `<button class="${s === st ? "cur" : ""}" onclick="setStatus('${id}','${s}')">${s}</button>`;
 
     const rows = Object.keys(LABELS).map(k =>
       `<div><span>${LABELS[k]}</span><span>${esc(d[k] || "-")}</span></div>`).join("");
 
-    const mobile = d.mobile
-      ? `<a href="tel:${esc(d.mobile)}">${esc(d.mobile)}</a>` : "-";
+    const mobile = d.mobile ? `<a href="tel:${esc(d.mobile)}">${esc(d.mobile)}</a>` : "-";
 
     return `
       <div class="card ${st}">
@@ -175,11 +234,11 @@
         <div class="small">
           Mobile: ${mobile}<br>
           RO: ${esc(ro)} &nbsp;|&nbsp; Center: ${esc(d.center || "-")}<br>
-          Branch: ${esc(rec.branch || "-")} &nbsp;|&nbsp; ${esc(rec.date || "")} ${esc(rec.time || "")}
+          ${esc(rec.date || "")} ${esc(rec.time || "")}
         </div>
         <div class="btns">
           ${btn("Pending")}${btn("Verified")}${btn("Completed")}
-          <button class="details" onclick="toggle('${id}')">Files</button>
+          <button class="files" onclick="toggle('${id}')">Files</button>
         </div>
         <div class="det" id="det-${id}" style="display:none">
           ${rows}
@@ -195,19 +254,81 @@
 
   async function setStatus(id, status) {
     try {
-      const res = await (await fetch(SYNC_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "status", key: adminKey, id: id, status: status, by: adminName })
-      })).json();
+      const res = await get({ action: "status", token: token, id: id, status: status });
       if (!res.ok) throw new Error(res.error);
       const rec = records.find(x => String(x.ID) === id);
-      if (rec) { rec.Status = status; rec["Changed by"] = adminName; rec["Changed at"] = new Date().toLocaleString("en-IN"); }
-      render();
+      if (rec) {
+        rec.Status = status;
+        rec["Changed by"] = me.staff;
+        rec["Changed at"] = new Date().toLocaleString("en-IN");
+      }
+      renderRecords();
     } catch (e) {
       alert("Could not update: " + e.message);
     }
   }
+
+  // ---------- RO STAFF ----------
+  function renderStaff() {
+    const names = staffList.length
+      ? staffList.map(s => `<div class="staff">${esc(s.staff)}</div>`).join("")
+      : `<p style="font-size:14px;color:#475569">No RO staff yet.</p>`;
+
+    $("staffView").innerHTML = `
+      <div class="card plain">
+        <h2>RO staff in ${esc(me.branch)}</h2>
+        ${names}
+      </div>
+      <div class="card plain">
+        <h2>Add RO staff</h2>
+        <label>Staff name</label>
+        <input id="nStaff" type="text">
+        <label>Password (at least 6 characters)</label>
+        <input id="nPass" type="password">
+        <button class="btn full" onclick="addStaff()">Add staff</button>
+        <div id="sMsg" class="msg"></div>
+      </div>
+      <div class="card plain">
+        <h2>Reset RO password</h2>
+        <label>Staff name</label>
+        <input id="rStaff" type="text" list="staffNames">
+        <datalist id="staffNames">${staffList.map(s => `<option value="${esc(s.staff)}">`).join("")}</datalist>
+        <label>New password (at least 6 characters)</label>
+        <input id="rPass" type="password">
+        <button class="btn full" onclick="resetStaff()">Reset password</button>
+        <div id="rMsg" class="msg"></div>
+      </div>`;
+  }
+
+  async function addStaff() {
+    const staff = $("nStaff").value.trim();
+    const password = $("nPass").value;
+    try {
+      const res = await post({ action: "adduser", token: token, staff: staff, password: password });
+      if (!res.ok) throw new Error(res.error);
+      await loadAll();
+      renderStaff();
+      $("sMsg").className = "msg ok";
+      $("sMsg").textContent = "Added " + staff + ". Share the staff name and password with them.";
+    } catch (e) {
+      $("sMsg").className = "msg";
+      $("sMsg").textContent = e.message;
+    }
+  }
+
+  async function resetStaff() {
+    const staff = $("rStaff").value.trim();
+    const password = $("rPass").value;
+    try {
+      const res = await post({ action: "resetpass", token: token, staff: staff, password: password });
+      if (!res.ok) throw new Error(res.error);
+      $("rMsg").className = "msg ok";
+      $("rMsg").textContent = "Password reset for " + staff + ".";
+    } catch (e) {
+      $("rMsg").className = "msg";
+      $("rMsg").textContent = e.message;
+    }
+  }
 </script>
 </body>
-</html
+</html>
