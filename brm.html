@@ -1,0 +1,419 @@
+    const s = await get({ action: "staff" });
+    staffList = s.ok ? s.staff : [];
+    lastTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return changed;
+  }
+
+  // Don't redraw while the user is choosing a BCM or typing
+  function busy() {
+    const a = document.activeElement;
+    if (a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA")) return true;
+    return false;
+  }
+
+  function startAutoSync() {
+    if (autoTimer) return;
+    autoTimer = setInterval(autoSync, 3000);
+  }
+
+  async function autoSync() {
+    if (!me || autoBusy) return;
+    autoBusy = true;
+    try {
+      const r = await get({ action: "records" });
+      if (r.ok) {
+        const sig = JSON.stringify(r.records);
+        if (sig !== lastSig) { lastSig = sig; recs = r.records; pending = true; }
+      }
+      lastTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      // Staff list is only redrawn on the Staff tab when the user isn't typing there
+      if (pending && !busy() && view !== "staff" && view !== "perf") { pending = false; render(); }
+      else if (view === "staff") { $("lastSync").textContent = lastTime; }
+      else { $("lastSync").textContent = lastTime; }
+    } catch (e) {
+    } finally {
+      autoBusy = false;
+    }
+  }
+
+  async function manualSync() {
+    try {
+      await loadAll();
+      pending = false;
+      render();
+    } catch (e) { alert("Sync failed: " + e.message); }
+  }
+
+  function setView(v) {
+    view = v;
+    if (v === "perf") perfData = null; // reload performance when the tab opens
+    ["files", "sum", "staff", "perf"].forEach(x => {
+      $("t" + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle("on", x === v);
+      $(x + "View").style.display = x === v ? "block" : "none";
+    });
+    render();
+  }
+
+  function render() {
+    $("lastSync").textContent = lastTime;
+    if (view === "files") renderFiles();
+    else if (view === "sum") renderSummary();
+    else if (view === "perf") renderPerf();
+    else renderStaff();
+  }
+
+  // ---------- FILES ----------
+  function renderFiles() {
+    const c = { total: recs.length, Pending: 0, Assigned: 0, Verified: 0, Completed: 0, disb: 0 };
+    recs.forEach(r => {
+      const s = r.Status || "Pending";
+      if (c[s] !== undefined) c[s]++;
+      if (r.Result === "Passed" && r.Disbursed === "Yes") c.disb++;
+    });
+    const opts = ["All", "Pending", "Assigned", "Verified", "Completed"];
+    $("filesView").innerHTML = `
+      <div class="stats">
+        <div class="stat" style="background:#4c1d95"><div class="n">${c.total}</div><div class="l">All files</div></div>
+        <div class="stat" style="background:#f59e0b"><div class="n">${c.Pending}</div><div class="l">Pending</div></div>
+        <div class="stat" style="background:#2563eb"><div class="n">${c.Verified}</div><div class="l">Verified</div></div>
+        <div class="stat" style="background:#16a34a"><div class="n">${c.disb}</div><div class="l">Disbursed</div></div>
+      </div>
+      <div class="filters">${opts.map(f => `<button class="${f === filter ? "on" : ""}" onclick="setFilter('${f}')">${f}</button>`).join("")}</div>
+      ${recs.filter(r => filter === "All" || (r.Status || "Pending") === filter).map(fileCard).join("") || `<div class="card">No files.</div>`}`;
+  }
+
+  function setFilter(f) { filter = f; render(); }
+
+  function fileCard(r) {
+    const d = (r.Data && r.Data.data) || {};
+    const id = String(r.ID);
+    const st = r.Status || "Pending";
+    const shown = st === "Completed" ? (r.Result || "Completed") : st;
+
+    let result = "";
+    if (st === "Completed") {
+      result = r.Result === "Passed"
+        ? `<br><b>Passed: ${money(r["Passed Amount"])}</b>`
+        : `<br><b>Rejected: ${esc(r["Reject Reason"] || "-")}</b>`;
+    }
+
+    // Loan disbursed Yes/No: only for passed loans
+    const disbursedRow = (st === "Completed" && r.Result === "Passed") ? `
+      <div class="disb">
+        <span>Loan disbursed?</span>
+        <div>
+          <button class="btn sm ${r.Disbursed === "Yes" ? "yes" : "off"}" onclick="disburse('${id}','Yes')">Yes</button>
+          <button class="btn sm ${r.Disbursed === "No" ? "no" : "off"}" onclick="disburse('${id}','No')">No</button>
+        </div>
+      </div>` : "";
+
+    const assign = st === "Completed" ? "" : `
+      <div class="row2">
+        <select id="as-${id}">
+          <option value="">Choose BCM</option>
+          ${bcms.map(b => `<option ${same(b.staff, r["Assigned BCM"]) ? "selected" : ""}>${esc(b.staff)}</option>`).join("")}
+        </select>
+        <button class="btn sm" onclick="assign('${id}')">Assign</button>
+      </div>`;
+
+    return `
+      <div class="card ${shown}">
+        <div class="top">
+          <span class="name">${esc(d.cname || r.Client || "-")}</span>
+          <span class="pill ${shown}">${shown}</span>
+        </div>
+        <div class="small">
+          RO: ${esc(r.Staff || "-")} &nbsp;|&nbsp; ${esc(r.Type || "")} &nbsp;|&nbsp; ${esc(d.product || r.Product || "-")}<br>
+          Center: ${esc(d.center || r.Center || "-")} &nbsp;|&nbsp; Requested: ${money(r["Requested Amount"])}<br>
+          Scheduled: ${fmt(r["Scheduled At"])} &nbsp;|&nbsp; BCM: ${esc(r["Assigned BCM"] || "Not assigned")}
+          ${result}
+        </div>
+        ${disbursedRow}
+        ${assign}
+      </div>`;
+  }
+
+  async function assign(id) {
+    const bcm = $("as-" + id).value;
+    if (!bcm) { alert("Choose a BCM first."); return; }
+    try {
+      const res = await post({ action: "assign", id: id, bcm: bcm });
+      if (!res.ok) throw new Error(res.error);
+      await loadAll();
+      render();
+    } catch (e) { alert(e.message); }
+  }
+
+  async function disburse(id, value) {
+    try {
+      const res = await post({ action: "disburse", id: id, value: value });
+      if (!res.ok) throw new Error(res.error);
+      await loadAll();
+      render();
+    } catch (e) { alert(e.message); }
+  }
+
+  // ---------- SUMMARY ----------
+  function totals(list) {
+    const t = { files: list.length, grt: 0, pd: 0, open: 0, verified: 0, completed: 0,
+                passed: 0, amt: 0, rejected: 0, disb: 0, disbAmt: 0 };
+    list.forEach(r => {
+      if (r.Type === "GRT") t.grt++; else if (r.Type === "PD") t.pd++;
+      const s = r.Status || "Pending";
+      if (s === "Pending" || s === "Assigned") t.open++;
+      else if (s === "Verified") t.verified++;
+      else if (s === "Completed") t.completed++;
+      if (r.Result === "Passed") {
+        t.passed++;
+        t.amt += Number(r["Passed Amount"]) || 0;
+        if (r.Disbursed === "Yes") { t.disb++; t.disbAmt += Number(r["Passed Amount"]) || 0; }
+      }
+      if (r.Result === "Rejected") t.rejected++;
+    });
+    return t;
+  }
+
+  function groupBy(key) {
+    const g = {};
+    recs.forEach(r => {
+      const k = r[key] || "Not assigned";
+      (g[k] = g[k] || []).push(r);
+    });
+    return g;
+  }
+
+  function renderSummary() {
+    const all = totals(recs);
+    const head = `<tr><th>Name</th><th>GRT</th><th>PD</th><th>Open</th><th>Verified</th><th>Done</th><th>Pass</th><th>Rej</th><th>Amount</th><th>Disb</th></tr>`;
+    const row = (name, t) => `<tr>
+      <td><b>${esc(name)}</b></td><td>${t.grt}</td><td>${t.pd}</td><td>${t.open}</td>
+      <td>${t.verified}</td><td>${t.completed}</td><td>${t.passed}</td><td>${t.rejected}</td>
+      <td>${money(t.amt)}</td><td>${t.disb}</td></tr>`;
+    const ros = groupBy("Staff"), bc = groupBy("Assigned BCM");
+
+    $("sumView").innerHTML = `
+      <div class="card">
+        <h2>Branch total</h2>
+        <div class="stats">
+          <div class="stat" style="background:#16a34a"><div class="n">${all.grt}</div><div class="l">GRT</div></div>
+          <div class="stat" style="background:#2563eb"><div class="n">${all.pd}</div><div class="l">PD</div></div>
+          <div class="stat" style="background:#16a34a"><div class="n">${all.passed}</div><div class="l">Passed</div></div>
+          <div class="stat" style="background:#dc2626"><div class="n">${all.rejected}</div><div class="l">Rejected</div></div>
+        </div>
+        <div class="small"><b>Total passed loan amount: ${money(all.amt)}</b><br>
+          <b>Disbursed: ${all.disb} loans, ${money(all.disbAmt)}</b></div>
+      </div>
+      <div class="card">
+        <h2>RO-wise status</h2>
+        <div class="scroll"><table class="tbl">${head}
+          ${Object.keys(ros).map(k => row(k, totals(ros[k]))).join("") || `<tr><td colspan="10">No files</td></tr>`}
+        </table></div>
+      </div>
+      <div class="card">
+        <h2>BCM-wise status</h2>
+        <div class="scroll"><table class="tbl">${head}
+          ${Object.keys(bc).map(k => row(k, totals(bc[k]))).join("") || `<tr><td colspan="10">No files</td></tr>`}
+        </table></div>
+      </div>`;
+  }
+
+  // ---------- RO PERFORMANCE ----------
+  const PERF_FIELDS = [["IGL1", "IGL 1st cycle"], ["IGL2", "IGL 2nd cycle & above"],
+                       ["IL", "IL"], ["MSME", "MSME"], ["GOLD", "Gold loan"]];
+  let perfPeriod = (function () { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); })();
+  let perfData = null;
+
+  function numOf(id) { return parseFloat($(id).value) || 0; }
+
+  async function loadPerf() {
+    const r = await get({ action: "perfget", period: perfPeriod });
+    if (!r.ok) throw new Error(r.error);
+    perfData = r;
+  }
+
+  function changePeriod(v) {
+    if (!v) return;
+    perfPeriod = v;
+    perfData = null;
+    renderPerf();
+  }
+
+  async function renderPerf() {
+    const box = $("perfView");
+    try {
+      if (!perfData || perfData.period !== perfPeriod) await loadPerf();
+    } catch (e) {
+      box.innerHTML = `<div class="card">${esc(e.message)}</div>`;
+      return;
+    }
+    const d = perfData;
+    const tot = d.rows.reduce((t, r) => {
+      t.count += r.count; t.ach += r.achieved; t.tgt += r.target;
+      return t;
+    }, { count: 0, ach: 0, tgt: 0 });
+
+    box.innerHTML = `
+      <div class="card">
+        <h2>RO performance</h2>
+        <label>Month</label>
+        <input type="month" value="${perfPeriod}" onchange="changePeriod(this.value)">
+        <label>Holidays this month (comma separated, e.g. 2026-10-02, 2026-10-20)</label>
+        <input id="perfHol" type="text" value="${esc(d.holidays || "")}">
+        <button class="btn full" onclick="saveHolidays()">Save holidays</button>
+        <div class="stats" style="margin-top:12px">
+          <div class="stat" style="background:#4c1d95"><div class="n">${tot.count}</div><div class="l">Loans</div></div>
+          <div class="stat" style="background:#16a34a"><div class="n">${money(tot.ach)}</div><div class="l">Achieved</div></div>
+          <div class="stat" style="background:#2563eb"><div class="n">${money(tot.tgt)}</div><div class="l">Target</div></div>
+          <div class="stat" style="background:#db2777"><div class="n">${d.balanceDays}</div><div class="l">Balance working days</div></div>
+        </div>
+      </div>
+      ${d.rows.map((ro, i) => roCard(ro, i)).join("") || `<div class="card">No ROs in your branch yet. Add them in the Staff tab.</div>`}`;
+  }
+
+  function roCard(ro, i) {
+    return `
+      <div class="card" style="border-left-color:#4c1d95">
+        <div class="top">
+          <span class="name">${esc(ro.staff)}</span>
+          <span class="small">DRR set: <b>${money(ro.drrPublished)}</b></span>
+        </div>
+        <div class="grid" style="margin-top:8px">
+          ${PERF_FIELDS.map(([k, label]) => `
+            <div><label>${label} - loans</label>
+              <input id="i-${i}-${k}_Count" type="number" inputmode="numeric" value="${ro.products[k].count || ""}" oninput="calcRo(${i})"></div>
+            <div><label>${label} - amount (₹)</label>
+              <input id="i-${i}-${k}_Amt" type="number" inputmode="decimal" value="${ro.products[k].amt || ""}" oninput="calcRo(${i})"></div>`).join("")}
+        </div>
+        <label>Target amount (₹)</label>
+        <input id="i-${i}-Target" type="number" inputmode="decimal" value="${ro.target || ""}" oninput="calcRo(${i})">
+        <div class="calc">
+          <div>Loans: <b id="c-${i}">${ro.count}</b></div>
+          <div>Achieved: <b id="a-${i}">${money(ro.achieved)}</b></div>
+          <div>Balance target: <b id="b-${i}">${money(ro.balance)}</b></div>
+          <div>DRR (auto): <b id="r-${i}">${money(ro.drr)}</b></div>
+        </div>
+        <div class="btns2">
+          <button class="btn sm" onclick="savePerf(${i})">Save</button>
+          <button class="btn sm yes" onclick="publishDrr(${i})">DRR</button>
+        </div>
+        <div class="msg" id="pm-${i}"></div>
+      </div>`;
+  }
+
+  // Recalculate achieved, balance and DRR while typing
+  function calcRo(i) {
+    let count = 0, ach = 0;
+    PERF_FIELDS.forEach(([k]) => { count += numOf(`i-${i}-${k}_Count`); ach += numOf(`i-${i}-${k}_Amt`); });
+    const bal = numOf(`i-${i}-Target`) - ach;
+    const days = perfData ? perfData.balanceDays : 0;
+    const drr = bal > 0 && days > 0 ? Math.round(bal / days * 100) / 100 : 0;
+    $("c-" + i).textContent = count;
+    $("a-" + i).textContent = money(ach);
+    $("b-" + i).textContent = money(bal);
+    $("r-" + i).textContent = money(drr);
+  }
+
+  async function savePerf(i) {
+    const ro = perfData.rows[i];
+    const values = { Target: numOf(`i-${i}-Target`) };
+    PERF_FIELDS.forEach(([k]) => {
+      values[k + "_Count"] = numOf(`i-${i}-${k}_Count`);
+      values[k + "_Amt"] = numOf(`i-${i}-${k}_Amt`);
+    });
+    try {
+      const res = await post({ action: "perfsave", period: perfPeriod, staff: ro.staff, values: values });
+      if (!res.ok) throw new Error(res.error);
+      perfData = null;
+      await renderPerf();
+      if ($("pm-" + i)) { $("pm-" + i).className = "msg ok"; $("pm-" + i).textContent = "Saved"; }
+    } catch (e) { alert(e.message); }
+  }
+
+  // DRR = balance target / balance working days. Publishes it to the RO app.
+  async function publishDrr(i) {
+    const ro = perfData.rows[i];
+    try {
+      const res = await post({ action: "perfdrr", period: perfPeriod, staff: ro.staff });
+      if (!res.ok) throw new Error(res.error);
+      alert("DRR set for " + ro.staff + ": " + money(res.drr) + " per working day. It now shows in the RO app.");
+      perfData = null;
+      await renderPerf();
+    } catch (e) { alert(e.message); }
+  }
+
+  async function saveHolidays() {
+    try {
+      const res = await post({ action: "perfholidays", period: perfPeriod, holidays: $("perfHol").value });
+      if (!res.ok) throw new Error(res.error);
+      perfData = null;
+      await renderPerf();
+    } catch (e) { alert(e.message); }
+  }
+
+  // ---------- STAFF ----------
+  function renderStaff() {
+    $("staffView").innerHTML = `
+      <div class="card">
+        <h2>Staff in ${esc(me.branch)}</h2>
+        ${staffList.map(s => `
+          <div class="staff">
+            <span>${esc(s.staff)} <small>${s.role}</small></span>
+            ${same(s.staff, me.staff) ? "<small>(you)</small>" :
+              `<button class="btn sm del" onclick="removeStaff('${esc(s.staff)}')">Remove</button>`}
+          </div>`).join("") || `<p class="note">No staff yet.</p>`}
+      </div>
+      <div class="card">
+        <h2>Add RO or BCM</h2>
+        <label>Role</label>
+        <select id="nRole"><option value="RO">RO (Relationship Officer)</option><option value="BCM">BCM</option></select>
+        <label>Name</label>
+        <input id="nStaff" type="text">
+        <label>Password (at least 6 characters)</label>
+        <input id="nPass" type="password">
+        <button class="btn full" onclick="addStaff()">Add</button>
+        <div id="sMsg" class="msg"></div>
+      </div>
+      <div class="card">
+        <h2>Reset password</h2>
+        <label>Name</label>
+        <input id="rStaff" type="text" list="names">
+        <datalist id="names">${staffList.map(s => `<option value="${esc(s.staff)}">`).join("")}</datalist>
+        <label>New password (at least 6 characters)</label>
+        <input id="rPass" type="password">
+        <button class="btn full" onclick="resetStaff()">Reset password</button>
+        <div id="rMsg" class="msg"></div>
+      </div>`;
+  }
+
+  async function addStaff() {
+    try {
+      const res = await post({ action: "adduser", role: $("nRole").value, staff: $("nStaff").value.trim(), password: $("nPass").value });
+      if (!res.ok) throw new Error(res.error);
+      await loadAll();
+      renderStaff();
+      $("sMsg").className = "msg ok";
+      $("sMsg").textContent = "Added. Share the name and password with them.";
+    } catch (e) { $("sMsg").className = "msg"; $("sMsg").textContent = e.message; }
+  }
+
+  async function resetStaff() {
+    try {
+      const res = await post({ action: "resetpass", staff: $("rStaff").value.trim(), password: $("rPass").value });
+      if (!res.ok) throw new Error(res.error);
+      $("rMsg").className = "msg ok";
+      $("rMsg").textContent = "Password reset.";
+    } catch (e) { $("rMsg").className = "msg"; $("rMsg").textContent = e.message; }
+  }
+
+  async function removeStaff(name) {
+    if (!confirm("Remove " + name + "? They will be logged out straight away.")) return;
+    try {
+      const res = await post({ action: "remove", staff: name });
+      if (!res.ok) throw new Error(res.error);
+      await loadAll();
+      renderStaff();
+    } catch (e) { alert(e.message); }
+  }
+</script>
+</body>
+</html>
