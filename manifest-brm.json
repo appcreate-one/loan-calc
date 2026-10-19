@@ -1,0 +1,17 @@
+{
+  "name": "H2H BRM",
+  "short_name": "H2H BRM",
+  "start_url": "./brm.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e6f5ea",
+  "theme_color": "#145a2a",
+  "icons": [
+    {
+      "src": "BRM_H2H_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
