@@ -1,85 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1e3a5f">
-<link rel="manifest" href="manifest.json">
-<title>Loan Details</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, Helvetica, sans-serif; background: #eef2ff; color: #0f172a; }
+  .s5 { background: linear-gradient(135deg, #15803d, #22c55e); }
+  .s6 { background: linear-gradient(135deg, #0f766e, #14b8a6); }
 
-  header { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; padding: 14px 16px; text-align: center; }
-  header h1 { font-size: 20px; letter-spacing: 0.5px; }
-  #clock { font-size: 13px; opacity: 0.95; margin-top: 6px; }
-  #who { font-size: 13px; margin-top: 8px; }
-  #who button { margin-left: 10px; padding: 4px 10px; font-size: 12px; border: 1px solid #fff; background: none; color: #fff; border-radius: 6px; font-family: Arial, sans-serif; }
+  .scroll { overflow-x: auto; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tbl th, .tbl td { border-bottom: 1px solid #e2e8f0; padding: 7px 4px; text-align: left; vertical-align: top; }
+  .tbl th { color: #1e3a5f; background: #f8fafc; }
+  .sched { padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 13px; }
+  .sched small { color: #64748b; }
 
-  .tabs { display: flex; gap: 6px; padding: 10px; position: sticky; top: 0; z-index: 5; background: #eef2ff; overflow-x: auto; }
-  .tab { flex: 1; min-width: 88px; padding: 11px 6px; border: none; border-radius: 999px; background: #fff; color: #1e3a5f; font-size: 14px; font-weight: bold; font-family: Arial, sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,0.12); white-space: nowrap; }
-  .tab.active { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
-
-  main { max-width: 520px; margin: 0 auto; padding: 4px 14px 14px; }
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  .card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
-  .card h2 { font-size: 15px; color: #1e3a5f; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e0e7ff; }
-  .card h3 { font-size: 14px; color: #2563eb; margin: 16px 0 4px; }
-  label { display: block; font-size: 13px; color: #475569; margin: 10px 0 4px; font-weight: bold; }
-  input[type="text"], input[type="number"], input[type="tel"], input[type="password"], select { width: 100%; font-size: 16px; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; color: #0f172a; font-family: Arial, sans-serif; }
-  input:focus, select:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
-  .chk { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-size: 15px; color: #0f172a; font-weight: normal; }
-  .chk input { width: 18px; height: 18px; }
-  details summary { font-size: 14px; color: #2563eb; cursor: pointer; margin-top: 12px; font-weight: bold; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  .seg { display: flex; gap: 8px; margin: 4px 0 6px; }
-  .seg button { flex: 1; padding: 11px 6px; border: 2px solid #c7d2fe; background: #eef2ff; color: #1e3a5f; border-radius: 10px; font-size: 15px; font-weight: bold; font-family: Arial, sans-serif; }
-  .seg button.on { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-  .row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
-  .row:last-child { border-bottom: none; }
-  .row span:first-child { color: #64748b; }
-  .row span:last-child { font-weight: bold; text-align: right; }
-  .row.total { border-top: 2px solid #1e3a5f; border-bottom: none; margin-top: 6px; padding-top: 10px; }
-  .row.total span { color: #1e3a5f; }
-  .row.key span:last-child { color: #2563eb; }
-
-  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  .btn { padding: 14px 4px; font-size: 15px; border: none; border-radius: 10px; background: #e2e8f0; color: #0f172a; font-family: Arial, sans-serif; font-weight: bold; }
-  .btn.wa { background: linear-gradient(135deg, #16a34a, #25d366); color: #fff; }
-  .btn.pdf { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
-  .btn.save { background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; width: 100%; margin-bottom: 10px; }
-  .btn.full { width: 100%; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; margin-top: 14px; }
-  .btn.sync { width: 100%; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
-  .note { font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 10px; }
-  .msg { font-size: 13px; margin-top: 10px; min-height: 16px; }
-  .err { color: #b91c1c; }
-  .ok { color: #15803d; }
-
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .stat { border-radius: 14px; padding: 16px 8px; text-align: center; color: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
-  .stat .num { font-size: 28px; font-weight: bold; }
-  .stat .lbl { font-size: 12px; margin-top: 4px; opacity: 0.95; }
-  .s1 { background: linear-gradient(135deg, #16a34a, #4ade80); }
-  .s2 { background: linear-gradient(135deg, #0d9488, #2dd4bf); }
-  .s3 { background: linear-gradient(135deg, #2563eb, #60a5fa); }
-  .s4 { background: linear-gradient(135deg, #7c3aed, #c084fc); }
-  .rec { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px; margin-bottom: 8px; border-radius: 10px; background: #f8fafc; border-left: 5px solid #2563eb; font-size: 14px; }
-  .rec.GRT { border-left-color: #16a34a; }
-  .rec small { color: #64748b; }
-  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; margin-left: 4px; color: #fff; }
-  .badge.GRT { background: #16a34a; }
-  .badge.PD { background: #2563eb; }
-  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; color: #fff; font-weight: bold; margin-top: 4px; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; color: #fff; font-weight: bold; margin-top: 2px; }
   .pill.Pending { background: #f59e0b; }
+  .pill.Assigned { background: #7c3aed; }
   .pill.Verified { background: #2563eb; }
-  .pill.Completed { background: #16a34a; }
+  .pill.Passed { background: #16a34a; }
+  .pill.Rejected { background: #dc2626; }
+  .pill.Disbursed { background: #0f766e; }
   .pill.nosync { background: #64748b; }
+  .rejReason { color: #b91c1c; font-size: 11px; margin-top: 3px; }
   .del { padding: 6px 10px; font-size: 12px; border: none; border-radius: 6px; background: #fee2e2; color: #b91c1c; font-family: Arial, sans-serif; }
 
+  .result-card h2 { color: #1e3a5f; }
+  .me td { background: #e0e7ff; }
   footer { text-align: center; font-size: 12px; color: #64748b; padding: 10px 0 24px; }
   #printArea { display: none; }
   @media print {
@@ -92,11 +33,13 @@
     .tab { font-size: 12px; min-width: 76px; }
   }
 </style>
+<link rel="stylesheet" href="h2h.css">
 </head>
-<body>
+<body data-theme="ro">
 
 <header>
-  <h1>LOAN DETAILS</h1>
+  <img class="brand" src="RO_H2H_512.png" alt="H2H">
+  <h1>H2H &middot; Relationship Officer</h1>
   <div id="clock"></div>
   <div id="who"></div>
 </header>
@@ -115,12 +58,14 @@
     <button class="tab" data-tab="n">New Client</button>
     <button class="tab" data-tab="e">Existing</button>
     <button class="tab" data-tab="p">PD / GRT</button>
+    <button class="tab" data-tab="biz">Business</button>
   </nav>
   <main>
     <section id="panel-dash" class="panel active"></section>
     <section id="panel-n" class="panel"></section>
     <section id="panel-e" class="panel"></section>
     <section id="panel-p" class="panel"></section>
+    <section id="panel-biz" class="panel"></section>
   </main>
 </div>
 
@@ -135,55 +80,49 @@
   const INCOME_OPTIONS = ["Salaried", "Own business"];
 
   const REC_KEY = "loancalc_records";
-  const SESS_KEY = "loancalc_session";  // logged-in staff: token, branch, staff, role
+  const SESS_KEY = "loancalc_session";
 
   // Only the web app URL goes here. No passwords or keys are stored in this app.
-  const SYNC_URL = "https://script.google.com/macros/s/AKfycbxRCx6N62C3ke8ZVZDi_nNojd4F_DtUUEAh4LWu66LhCy7m-JuXeGKaaaKqjRuohEZi/exec";
+  const SYNC_URL = "PASTE_WEB_APP_URL_HERE";
+
+  let schedItems = [];
 
   const $ = id => document.getElementById(id);
 
   function money(n) {
-    if (!isFinite(n)) return "-";
-    return "\u20B9" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (n === "" || n === null || n === undefined || !isFinite(n)) return "-";
+    return "\u20B9" + Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
-  function today() {
-    return new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-  }
-  function nowTime() {
-    return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-  }
+  function today() { return new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }); }
+  function nowTime() { return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }); }
   function todayKey() {
     const d = new Date();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return d.getFullYear() + "-" + mm + "-" + dd;
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function fmtDT(s) {
+    if (!s) return "-";
+    const d = new Date(s);
+    return isNaN(d) ? String(s) : d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
   }
   function getChecks(name) {
     return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e => e.value);
   }
   function checkGroup(name, options) {
-    return options.map(o =>
-      `<label class="chk"><input type="checkbox" name="${name}" value="${o}"> ${o}</label>`
-    ).join("");
+    return options.map(o => `<label class="chk"><input type="checkbox" name="${name}" value="${o}"> ${o}</label>`).join("");
   }
   function segGroup(targetId, options, selected) {
-    const btns = options.map(o =>
-      `<button type="button" data-v="${o.v}" class="${o.v === selected ? "on" : ""}">${o.label}</button>`
-    ).join("");
-    return `<div class="seg" data-target="${targetId}">${btns}</div>
-            <input type="hidden" id="${targetId}" value="${selected}">`;
+    const btns = options.map(o => `<button type="button" data-v="${o.v}" class="${o.v === selected ? "on" : ""}">${o.label}</button>`).join("");
+    return `<div class="seg" data-target="${targetId}">${btns}</div><input type="hidden" id="${targetId}" value="${selected}">`;
   }
 
-  // Live date and time in the header
   function tickClock() {
     const d = new Date();
     $("clock").textContent =
       d.toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }) +
-      "  |  " +
-      d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      "  |  " + d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   }
   tickClock();
   setInterval(tickClock, 1000);
@@ -195,12 +134,8 @@
   function getRecords() {
     try { return JSON.parse(localStorage.getItem(REC_KEY)) || []; } catch (e) { return []; }
   }
-  function saveRecords(list) {
-    localStorage.setItem(REC_KEY, JSON.stringify(list));
-  }
-  function syncConfigured() {
-    return SYNC_URL && !SYNC_URL.startsWith("PASTE");
-  }
+  function saveRecords(list) { localStorage.setItem(REC_KEY, JSON.stringify(list)); }
+  function syncConfigured() { return SYNC_URL && !SYNC_URL.startsWith("PASTE"); }
 
   // ---------- LOGIN ----------
   function renderLogin() {
@@ -221,13 +156,12 @@
     const msg = $("l_msg");
     msg.className = "msg err";
     if (!syncConfigured()) { msg.textContent = "App is not connected to the server yet."; return; }
-    const branch = $("l_branch").value.trim();
-    const staff = $("l_staff").value.trim();
-    const password = $("l_pass").value;
+    const branch = $("l_branch").value.trim(), staff = $("l_staff").value.trim(), password = $("l_pass").value;
     if (!branch || !staff || !password) { msg.textContent = "Fill in all fields."; return; }
     try {
       const res = await postJSON({ action: "login", branch: branch, staff: staff, password: password });
       if (!res.ok) { msg.textContent = res.error; return; }
+      if (res.role !== "RO") { msg.textContent = "This login is for the BCM or BRM app, not the RO app."; return; }
       startSession({ token: res.token, branch: res.branch, staff: res.staff, role: res.role });
     } catch (e) {
       msg.textContent = "No internet or server error. Try again.";
@@ -237,6 +171,7 @@
   function startSession(acc) {
     sessionStorage.setItem(SESS_KEY, JSON.stringify(acc));
     showApp();
+    startAutoSync();
   }
 
   function logout() {
@@ -254,66 +189,94 @@
     $("appScreen").style.display = "block";
     $("who").innerHTML = `Branch: ${esc(acc.branch)} &nbsp;|&nbsp; Staff: ${esc(acc.staff)}
       <button onclick="logout()">Logout</button>`;
-    ["n_ro", "e_ro", "p_ro"].forEach(id => {
-      if (!$(id).value) $(id).value = acc.staff;
-    });
+    ["n_ro", "e_ro", "p_ro"].forEach(id => { if (!$(id).value) $(id).value = acc.staff; });
     renderLoan("n");
     renderLoan("e");
     renderDashboard();
     setTab("dash");
+    loadSchedule();
   }
 
   function setTab(name) {
     document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
     document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + name));
+    if (name === "biz") renderBusiness();
   }
 
   // ---------- DASHBOARD ----------
+  // Label shown to the RO for a file's progress
+  function statusLabel(wf) {
+    const s = (wf && wf.Status) || "Pending";
+    if (s === "Completed") {
+      if (wf.Result !== "Passed") return "Rejected";
+      return wf.Disbursed === "Yes" ? "Disbursed" : "Passed";
+    }
+    return s;
+  }
+
   function renderDashboard() {
     const me = currentAccount();
     const recs = getRecords().filter(r => !r.staff || (me && r.staff === me.staff));
     const t = todayKey();
-    const count = (type, onlyToday) =>
-      recs.filter(r => r.type === type && (!onlyToday || r.date === t)).length;
+    const count = (type, onlyToday) => recs.filter(r => r.type === type && (!onlyToday || r.date === t)).length;
 
-    let html = `
+    const passed = recs.filter(r => r.wf && r.wf.Result === "Passed");
+    const passedAmt = passed.reduce((sum, r) => sum + (Number(r.wf["Passed Amount"]) || 0), 0);
+
+    const rows = recs.slice().sort((a, b) => b.id - a.id).map(r => {
+      const d = r.data || {};
+      const wf = r.wf || {};
+      const lab = statusLabel(wf);
+      const sched = wf.ScheduledAt || d.scheduledAt;
+      const assigned = wf.AssignedBCM ? "Assigned to " + esc(wf.AssignedBCM) : "Not assigned";
+      return `<tr>
+        <td><b>${esc(d.cname || "-")}</b><br><small>${r.type}</small></td>
+        <td>${esc(d.product || "-")}</td>
+        <td><span class="pill ${lab}">${lab}</span>${lab === "Passed" ? `<br><small>${money(wf.PassedAmount)}</small>` : ""}
+          ${lab === "Rejected" ? `<div class="rejReason">${esc(wf.RejectReason || "-")}</div>` : ""}
+          ${r.synced ? "" : `<br><span class="pill nosync">Not synced</span>`}</td>
+        <td>${assigned}</td>
+        <td>${esc(d.place || d.center || "-")}</td>
+        <td>${fmtDT(sched)}</td>
+      </tr>`;
+    }).join("");
+
+    const sched = schedItems.map(s => `
+      <div class="sched"><b>${fmtDT(s.scheduledAt)}</b> &nbsp; ${esc(s.type || "")} &nbsp; ${esc(s.client || "-")}<br>
+        <small>RO: ${esc(s.staff || "-")} &nbsp;|&nbsp; ${esc(s.center || "-")} &nbsp;|&nbsp; ${esc(s.product || "-")} &nbsp;|&nbsp; ${esc(s.status || "Pending")}</small></div>`).join("");
+
+    $("panel-dash").innerHTML = `
       <div class="card">
-        <button class="btn sync" onclick="syncAll()">Sync and refresh status</button>
+        <button class="btn sync" onclick="syncAll()">Sync now (send all)</button>
+        <div class="note" style="margin-top:6px">Auto sync every 3 seconds. Last: <span id="lastSync">-</span></div>
         <div id="syncMsg" class="msg"></div>
       </div>
+
       <div class="stats">
         <div class="stat s1"><div class="num">${count("GRT", true)}</div><div class="lbl">Today GRT</div></div>
         <div class="stat s2"><div class="num">${count("GRT", false)}</div><div class="lbl">Total GRT</div></div>
         <div class="stat s3"><div class="num">${count("PD", true)}</div><div class="lbl">Today PD</div></div>
         <div class="stat s4"><div class="num">${count("PD", false)}</div><div class="lbl">Total PD</div></div>
+        <div class="stat s5"><div class="num">${passed.length}</div><div class="lbl">Passed loans</div></div>
+        <div class="stat s6"><div class="num">${money(passedAmt)}</div><div class="lbl">Passed loan amount</div></div>
       </div>
-      <div class="card">
-        <h2>Recent records</h2>`;
 
-    const latest = recs.slice().sort((a, b) => b.id - a.id).slice(0, 10);
-    if (latest.length === 0) {
-      html += `<p class="note">No records saved yet. Save a GRT or PD from the PD / GRT tab.</p>`;
-    } else {
-      latest.forEach(r => {
-        html += `
-          <div class="rec ${r.type}">
-            <div>
-              <strong>${esc(r.data.cname || "-")}</strong>
-              <span class="badge ${r.type}">${r.type}</span><br>
-              <small>${esc(r.data.center || "-")} | ${r.date} ${r.time}</small><br>
-              <small>RO: ${esc(r.ro || "-")}</small><br>
-              <span class="pill ${r.status || "Pending"}">${r.status || "Pending"}</span>${r.synced ? "" : ' <span class="pill nosync">Not synced</span>'}
-            </div>
-            <button class="del" onclick="deleteRecord(${r.id})">Delete</button>
-          </div>`;
-      });
-    }
-    html += `</div>`;
-    $("panel-dash").innerHTML = html;
+      <div class="card">
+        <h2>My GRT / PD roadmap</h2>
+        ${recs.length ? `<div class="scroll"><table class="tbl">
+          <tr><th>Client</th><th>Product</th><th>Status</th><th>File assigned</th><th>Place</th><th>GRT time</th></tr>
+          ${rows}
+        </table></div>` : `<p class="note">No files yet. Save a GRT or PD from the PD / GRT tab.</p>`}
+      </div>
+
+      <div class="card">
+        <h2>Branch schedule (all ROs)</h2>
+        ${schedItems.length ? sched : `<p class="note">No scheduled GRT / PD yet. Tap Sync to load.</p>`}
+      </div>`;
   }
 
   function deleteRecord(id) {
-    if (!confirm("Delete this record from this phone? (It stays on the sheet.)")) return;
+    if (!confirm("Delete this record from this phone? (It stays on the server.)")) return;
     saveRecords(getRecords().filter(r => r.id !== id));
     renderDashboard();
   }
@@ -333,14 +296,10 @@
       <input id="${t}_loan" type="number" inputmode="decimal" value="85000">
 
       <label>Tenure</label>
-      ${segGroup(t + "_years", [
-        { v: 1, label: "1 year" }, { v: 2, label: "2 years" }, { v: 3, label: "3 years" }
-      ], 2)}
+      ${segGroup(t + "_years", [{ v: 1, label: "1 year" }, { v: 2, label: "2 years" }, { v: 3, label: "3 years" }], 2)}
 
       <label>Hospital insurance</label>
-      ${segGroup(t + "_hosp", [
-        { v: "yes", label: "Yes" }, { v: "no", label: "No" }
-      ], "yes")}
+      ${segGroup(t + "_hosp", [{ v: "yes", label: "Yes" }, { v: "no", label: "No" }], "yes")}
 
       ${isEx ? `
       <label>Closing balance of old loan</label>
@@ -357,13 +316,13 @@
       </details>
     </div>
 
-    <div class="card" id="${t}_result"></div>
+    <div class="card result-card" id="${t}_result"></div>
 
     <div class="actions">
       <button class="btn wa" onclick="shareWA('${t}')">WhatsApp</button>
       <button class="btn pdf" onclick="printLoan('${t}')">PDF</button>
     </div>
-    <p class="note">PDF: tap PDF, then choose "Save as PDF" on the print screen. Then share the saved file in WhatsApp from Downloads.</p>`;
+    <p class="note">PDF: tap PDF, then choose "Save as PDF" on the print screen.</p>`;
   }
 
   // ---------- PD / GRT PANEL ----------
@@ -373,20 +332,13 @@
       <h2>PD / GRT Details</h2>
 
       <label>Record type</label>
-      <select id="p_type">
-        <option value="GRT" selected>GRT</option>
-        <option value="PD">PD</option>
-      </select>
+      <select id="p_type"><option value="GRT" selected>GRT</option><option value="PD">PD</option></select>
 
       <label>Relationship Officer name</label>
       <input id="p_ro" type="text" placeholder="RO name">
 
       <label>Product</label>
-      <select id="p_product">
-        <option value="IGL" selected>IGL</option>
-        <option value="IL">IL</option>
-        <option value="MSME">MSME</option>
-      </select>
+      <select id="p_product"><option value="IGL" selected>IGL</option><option value="IL">IL</option><option value="MSME">MSME</option></select>
 
       <label>CLIENT name</label>
       <input id="p_cname" type="text">
@@ -398,16 +350,10 @@
       <input id="p_cycle" type="text" inputmode="numeric">
 
       <label>Consent letter provided</label>
-      <select id="p_consent">
-        <option value="YES" selected>YES</option>
-        <option value="NO">NO</option>
-      </select>
+      <select id="p_consent"><option value="YES" selected>YES</option><option value="NO">NO</option></select>
 
       <label>Existing arrear in center</label>
-      <select id="p_arrear">
-        <option value="YES">YES</option>
-        <option value="NO" selected>NO</option>
-      </select>
+      <select id="p_arrear"><option value="YES">YES</option><option value="NO" selected>NO</option></select>
 
       <label>IGL closing amount (if any)</label>
       <input id="p_closing" type="text" inputmode="decimal" placeholder="Leave blank if none">
@@ -421,12 +367,15 @@
       <label>Client available time</label>
       <input id="p_avail" type="text" placeholder="e.g. 10:00 AM to 12:00 PM">
 
+      <label>Requested loan amount (₹)</label>
+      <input id="p_loanReq" type="number" inputmode="decimal">
+
+      <label>GRT / PD scheduled date and time</label>
+      <input id="p_sched" type="datetime-local">
+
       <h3>Home verification</h3>
       <label>House type</label>
-      <select id="p_house">
-        <option value="Own house" selected>Own house</option>
-        <option value="Rent house">Rent house</option>
-      </select>
+      <select id="p_house"><option value="Own house" selected>Own house</option><option value="Rent house">Rent house</option></select>
 
       <label>How to verify</label>
       ${checkGroup("verify", VERIFY_OPTIONS)}
@@ -445,14 +394,13 @@
       <input id="p_leaderPhone" type="tel" inputmode="tel">
     </div>
 
-    <button class="btn save" onclick="savePdRecord()">Save record</button>
+    <button class="btn save" onclick="savePdRecord()">Save and send file</button>
     <div id="p_msg" class="msg"></div>
 
     <div class="actions" style="margin-top:14px">
       <button class="btn wa" onclick="sharePdWA()">WhatsApp</button>
       <button class="btn pdf" onclick="printPd()">PDF</button>
-    </div>
-    <p class="note">PDF: tap PDF, then choose "Save as PDF" on the print screen. Then share the saved file in WhatsApp from Downloads.</p>`;
+    </div>`;
   }
 
   $("panel-n").innerHTML = buildLoanPanel("n", "New Client", false);
@@ -498,9 +446,7 @@
              interest: totPay - P, w4: emi * 4, w5: emi * 5, totalEwi, extra: totalEwi - P };
   }
 
-  function titleOf(p) {
-    return p.type === "e" ? "Existing Client" : "New Client";
-  }
+  function titleOf(p) { return p.type === "e" ? "Existing Client" : "New Client"; }
 
   function fullRows(p, r) {
     const rows = [
@@ -528,7 +474,6 @@
     return rows;
   }
 
-  // Only these lines go in the WhatsApp / PDF share
   function shareRows(p, r) {
     const rows = [
       ["Loan amount", money(p.loan)],
@@ -580,8 +525,7 @@
 
   function printLoan(t) {
     const p = getInputs(t);
-    const r = calc(p);
-    printHTML(printHeader() + resultHTML(p, r));
+    printHTML(printHeader() + resultHTML(p, calc(p)));
   }
 
   // ---------- PD / GRT ----------
@@ -597,7 +541,8 @@
       verify: verify.length ? verify.join(", ") : "",
       vintage: v("p_vintage"),
       income: income.length ? income.join(", ") : "",
-      leader: v("p_leader"), leaderPhone: v("p_leaderPhone")
+      leader: v("p_leader"), leaderPhone: v("p_leaderPhone"),
+      loanReq: v("p_loanReq"), scheduledAt: v("p_sched")
     };
   }
 
@@ -614,6 +559,8 @@
       ["Correct Place", d.place || "-"],
       ["CLIENT Mobile number", d.mobile || "-"],
       ["Client available time", d.avail || "-"],
+      ["Requested loan amount", money(d.loanReq)],
+      ["GRT / PD scheduled", fmtDT(d.scheduledAt)],
       ["Home verification", d.house],
       ["How to verify", d.verify || "-"],
       ["House vintage stability", d.vintage ? d.vintage + " years" : "-"],
@@ -631,9 +578,7 @@
 
   function pdHTML(d) {
     let h = `<h2>PD / GRT Details</h2>`;
-    pdRows(d).forEach(([label, value]) => {
-      h += `<div class="row"><span>${label}</span><span>${esc(value)}</span></div>`;
-    });
+    pdRows(d).forEach(([label, value]) => { h += `<div class="row"><span>${label}</span><span>${esc(value)}</span></div>`; });
     return h;
   }
 
@@ -642,19 +587,15 @@
     const type = $("p_type").value;
     const msg = $("p_msg");
     const me = currentAccount();
-    if (!d.cname) {
-      msg.className = "msg err";
-      msg.textContent = "Enter CLIENT name before saving.";
-      return;
-    }
+    if (!d.cname) { msg.className = "msg err"; msg.textContent = "Enter CLIENT name before saving."; return; }
     const recs = getRecords();
     recs.push({ id: Date.now(), type: type, date: todayKey(), time: nowTime(),
                 branch: me.branch, staff: me.staff, ro: d.ro,
-                status: "Pending", synced: false, data: d });
+                synced: false, data: d, wf: null });
     saveRecords(recs);
 
     msg.className = "msg ok";
-    msg.textContent = "Saved " + type + " record for " + d.cname + " (" + today() + ")";
+    msg.textContent = "Saved " + type + " for " + d.cname + " (" + today() + ")";
     clearPdClient();
     renderDashboard();
     syncPending().then(res => { renderDashboard(); msg.textContent += " | " + res; });
@@ -662,52 +603,35 @@
 
   // Clear client-specific fields after saving; keep RO, product and type
   function clearPdClient() {
-    ["p_cname", "p_center", "p_cycle", "p_closing", "p_place", "p_mobile",
-     "p_avail", "p_vintage", "p_leader", "p_leaderPhone"].forEach(id => $(id).value = "");
+    ["p_cname", "p_center", "p_cycle", "p_closing", "p_place", "p_mobile", "p_avail",
+     "p_vintage", "p_leader", "p_leaderPhone", "p_loanReq", "p_sched"].forEach(id => $(id).value = "");
     document.querySelectorAll('input[name="verify"], input[name="income"]').forEach(c => c.checked = false);
   }
 
-  function sharePdWA() {
-    openWA(pdText(getPd()));
-  }
+  function sharePdWA() { openWA(pdText(getPd())); }
+  function printPd() { printHTML(printHeader() + pdHTML(getPd())); }
 
-  function printPd() {
-    printHTML(printHeader() + pdHTML(getPd()));
-  }
-
-  // ---------- SHARE HELPERS ----------
   function printHeader() {
     return `<div style="text-align:center;margin-bottom:12px">
-      <strong>LOAN DETAILS</strong><br>
-      <small>${today()}  ${nowTime()}</small><br>
-      <small>Created by Rajesh A G</small>
-    </div>`;
+      <strong>LOAN DETAILS</strong><br><small>${today()}  ${nowTime()}</small><br>
+      <small>Created by Rajesh A G</small></div>`;
   }
-
-  function openWA(text) {
-    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
-  }
-
-  function printHTML(html) {
-    $("printArea").innerHTML = html;
-    window.print();
-  }
+  function openWA(text) { window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank"); }
+  function printHTML(html) { $("printArea").innerHTML = html; window.print(); }
 
   // ---------- SYNC WITH SERVER ----------
   async function postJSON(payload) {
     const res = await fetch(SYNC_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(Object.assign({ token: (currentAccount() || {}).token }, payload))
     });
     return res.json();
   }
 
-  function sessionExpired(res) {
-    return res && res.error && /log in again/i.test(res.error);
-  }
+  function sessionExpired(res) { return res && res.error && /log in again/i.test(res.error); }
 
-  // Upload every record not yet on the server
+  // Send every saved file. The server skips files it already has.
   async function syncPending() {
     if (!syncConfigured()) return "Sync not set up yet";
     const me = currentAccount();
@@ -715,9 +639,8 @@
     const recs = getRecords();
     let ok = 0, fail = 0, expired = false;
     for (const r of recs) {
-      if (r.synced) continue;
       try {
-        const res = await postJSON({ action: "save", token: me.token, record: r });
+        const res = await postJSON({ action: "save", record: r });
         if (res.ok) { r.synced = true; ok++; }
         else { fail++; if (sessionExpired(res)) expired = true; }
       } catch (e) { fail++; }
@@ -727,7 +650,7 @@
     return "Uploaded " + ok + (fail ? ", " + fail + " failed (will retry)" : "");
   }
 
-  // Latest Pending / Verified / Completed status for your own records
+  // Latest workflow status for your own files (verified, passed, rejected, assigned BCM)
   async function refreshStatuses() {
     if (!syncConfigured()) return "";
     const me = currentAccount();
@@ -736,7 +659,7 @@
       const res = await (await fetch(SYNC_URL + "?action=statuses&token=" + encodeURIComponent(me.token))).json();
       if (!res.ok) return sessionExpired(res) ? "Session expired. Logout and login again" : "Status error: " + res.error;
       const recs = getRecords();
-      recs.forEach(r => { const s = res.statuses[String(r.id)]; if (s) r.status = s; });
+      recs.forEach(r => { const w = res.statuses[String(r.id)]; if (w) r.wf = w; });
       saveRecords(recs);
       return "Status updated";
     } catch (e) {
@@ -744,21 +667,159 @@
     }
   }
 
+  // Branch-wide GRT/PD schedule
+  async function loadSchedule() {
+    if (!syncConfigured()) return;
+    const me = currentAccount();
+    if (!me) return;
+    try {
+      const res = await (await fetch(SYNC_URL + "?action=schedule&token=" + encodeURIComponent(me.token))).json();
+      if (res.ok) {
+        schedItems = res.items.slice().sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+        renderDashboard();
+      }
+    } catch (e) {}
+  }
+
   async function syncAll() {
     const a = await syncPending();
     const b = await refreshStatuses();
+    await loadSchedule();
     renderDashboard();
     const m = $("syncMsg");
     m.className = "msg ok";
     m.textContent = a + ". " + b;
   }
 
-  // ---------- EVENTS ----------
-  document.querySelectorAll(".tab").forEach(btn => {
-    btn.addEventListener("click", () => setTab(btn.dataset.tab));
-  });
+  // ---------- BUSINESS PERFORMANCE ----------
+  const BIZ_PRODUCTS = [["IGL1", "IGL 1st cycle"], ["IGL2", "IGL 2nd cycle & above"],
+                        ["IL", "IL"], ["MSME", "MSME"], ["GOLD", "Gold loan"]];
+  let bizData = null;
 
-  // Segment buttons (tenure, hospital insurance)
+  function bizPeriod() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+  }
+
+  function sameName(a, b) { return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); }
+
+  async function fetchBusiness() {
+    if (!syncConfigured()) return false;
+    const me = currentAccount();
+    if (!me) return false;
+    const res = await (await fetch(SYNC_URL + "?action=perfget&period=" + bizPeriod() +
+                                   "&token=" + encodeURIComponent(me.token))).json();
+    if (!res.ok) return false;
+    const changed = JSON.stringify(res.rows) !== JSON.stringify(bizData ? bizData.rows : null);
+    bizData = res;
+    return changed;
+  }
+
+  function renderBusiness() {
+    const el = $("panel-biz");
+    const me = currentAccount();
+    if (!bizData || !me) {
+      el.innerHTML = `<div class="card"><p class="note">Loading business performance. Tap Sync now on the Dashboard if this stays empty.</p></div>`;
+      return;
+    }
+    const d = bizData;
+    const mine = d.rows.find(r => sameName(r.staff, me.staff));
+
+    const mySection = mine ? `
+      <div class="card">
+        <h2>My business - ${d.period}</h2>
+        <div class="stats">
+          <div class="stat s5"><div class="num">${mine.count}</div><div class="lbl">Loans</div></div>
+          <div class="stat s3"><div class="num">${money(mine.achieved)}</div><div class="lbl">Achieved</div></div>
+          <div class="stat s4"><div class="num">${money(mine.target)}</div><div class="lbl">Target</div></div>
+          <div class="stat s1"><div class="num">${money(mine.balance)}</div><div class="lbl">Balance target</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat s2"><div class="num">${d.balanceDays}</div><div class="lbl">Balance working days</div></div>
+          <div class="stat s6"><div class="num">${money(mine.drrPublished)}</div><div class="lbl">DRR (set by BRM)</div></div>
+        </div>
+        <p class="note">DRR = balance target ÷ balance working days. Last set: ${mine.drrSetAt ? esc(mine.drrSetAt) : "not set yet"}</p>
+      </div>
+      <div class="card">
+        <h2>My products</h2>
+        <div class="scroll"><table class="tbl">
+          <tr><th>Product</th><th>Loans</th><th>Amount</th></tr>
+          ${BIZ_PRODUCTS.map(([k, label]) => `<tr><td>${label}</td><td>${mine.products[k].count}</td><td>${money(mine.products[k].amt)}</td></tr>`).join("")}
+        </table></div>
+      </div>` : `
+      <div class="card"><p class="note">You are not in the performance list yet. Ask your BRM to add your targets.</p></div>`;
+
+    el.innerHTML = `
+      ${mySection}
+      <div class="card">
+        <h2>All ROs - ${d.period}</h2>
+        <div class="scroll"><table class="tbl">
+          <tr><th>RO</th><th>Loans</th><th>Achieved</th><th>Target</th><th>Balance</th><th>DRR</th></tr>
+          ${d.rows.map(r => `<tr class="${mine && sameName(r.staff, mine.staff) ? "me" : ""}">
+            <td><b>${esc(r.staff)}</b></td><td>${r.count}</td><td>${money(r.achieved)}</td>
+            <td>${money(r.target)}</td><td>${money(r.balance)}</td><td>${money(r.drrPublished)}</td></tr>`).join("")
+            || `<tr><td colspan="6">No ROs yet</td></tr>`}
+        </table></div>
+      </div>`;
+  }
+
+  // ---------- AUTO SYNC EVERY 3 SECONDS ----------
+  let autoTimer = null, autoBusy = false;
+
+  function startAutoSync() {
+    if (autoTimer) return;
+    autoSync();
+    autoTimer = setInterval(autoSync, 3000);
+  }
+
+  async function fetchSchedule() {
+    const me = currentAccount();
+    const res = await (await fetch(SYNC_URL + "?action=schedule&token=" + encodeURIComponent(me.token))).json();
+    if (!res.ok) return false;
+    const next = res.items.slice().sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+    const changed = JSON.stringify(next) !== JSON.stringify(schedItems);
+    schedItems = next;
+    return changed;
+  }
+
+  async function autoSync() {
+    if (autoBusy || !syncConfigured() || !currentAccount()) return;
+    autoBusy = true;
+    try {
+      const before = JSON.stringify(getRecords().map(r => [r.id, r.wf, r.synced]));
+
+      // Upload any files the server doesn't have yet
+      const recs = getRecords();
+      let uploaded = false;
+      for (const r of recs) {
+        if (r.synced) continue;
+        try {
+          const res = await postJSON({ action: "save", record: r });
+          if (res.ok) { r.synced = true; uploaded = true; }
+        } catch (e) {}
+      }
+      if (uploaded) saveRecords(recs);
+
+      // Latest status from BCM / BRM, and the branch schedule
+      await refreshStatuses();
+      const schedChanged = await fetchSchedule();
+      const bizChanged = await fetchBusiness();
+
+      const after = JSON.stringify(getRecords().map(r => [r.id, r.wf, r.synced]));
+      if (before !== after || schedChanged) renderDashboard();
+      if (bizChanged) renderBusiness();
+
+      const el = $("lastSync");
+      if (el) el.textContent = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    } catch (e) {
+    } finally {
+      autoBusy = false;
+    }
+  }
+
+  // ---------- EVENTS ----------
+  document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => setTab(btn.dataset.tab)));
+
   document.addEventListener("click", e => {
     const b = e.target.closest(".seg button");
     if (!b) return;
@@ -770,7 +831,6 @@
     if (prefix === "n" || prefix === "e") renderLoan(prefix);
   });
 
-  // Live update for text and number inputs
   document.querySelectorAll("input, select").forEach(el => {
     const prefix = el.id ? el.id.split("_")[0] : "";
     const update = () => { if (prefix === "n" || prefix === "e") renderLoan(prefix); };
@@ -781,6 +841,7 @@
   // ---------- START ----------
   if (currentAccount()) {
     showApp();
+    startAutoSync();
   } else {
     $("loginScreen").style.display = "block";
   }
