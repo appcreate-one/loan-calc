@@ -1,0 +1,17 @@
+{
+  "name": "H2H RO",
+  "short_name": "H2H RO",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e7f0ff",
+  "theme_color": "#0b3f9e",
+  "icons": [
+    {
+      "src": "RO_H2H_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
