@@ -91,6 +91,56 @@
 
   .result-card h2 { color: #1e3a5f; }
   .me td { background: #e0e7ff; }
+  /* ----- RO dashboard (design style) ----- */
+  body { padding-bottom: 92px; }
+  .syncRow { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+  .lastsync { text-align: right; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .lastsync b { display: block; font-size: 15px; color: #15803d; }
+  .kgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+  .kpi { border-radius: 18px; padding: 14px 8px; color: #fff; text-align: center; box-shadow: 0 8px 18px rgba(11,18,32,0.18); }
+  .kpi .big { font-size: 22px; font-weight: 800; line-height: 1.2; }
+  .kpi .lbl { font-size: 14px; font-weight: 700; margin-top: 4px; }
+  .kpi .sub { font-size: 12px; opacity: 0.95; margin-top: 2px; }
+  .k1 { background: linear-gradient(135deg, #15803d, #22c55e); }
+  .k2 { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+  .k3 { background: linear-gradient(135deg, #ea580c, #fb923c); }
+  .k4 { background: linear-gradient(135deg, #6d28d9, #a855f7); }
+  .crow { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+  .mini { padding: 14px; }
+  .mini h3 { font-size: 15px; margin-bottom: 8px; }
+  .legend { font-size: 13px; font-weight: 700; margin-top: 10px; }
+  .legend div { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .donut, .ring { width: 116px; height: 116px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+  .donut span, .ring span { background: #fff; width: 80px; height: 80px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; }
+  .bars { display: flex; align-items: flex-end; justify-content: space-around; height: 130px; }
+  .bcol { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: 13px; }
+  .bar { width: 26px; border-radius: 8px 8px 0 0; margin: 4px 0; }
+  .fpills { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 12px; }
+  .fpills button { border: 1.5px solid var(--line); background: #fff; color: var(--brand); border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 700; font-family: inherit; }
+  .fpills button.on { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; border-color: transparent; }
+  .twrap { overflow-x: auto; }
+  .ftable { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
+  .ftable th { text-align: left; background: var(--brand-soft); color: var(--brand); padding: 8px 6px; font-size: 12px; text-transform: uppercase; }
+  .ftable td { padding: 9px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .chip { display: inline-block; padding: 3px 9px; border-radius: 8px; font-weight: 800; font-size: 12px; }
+  .sp { display: inline-block; padding: 4px 9px; border-radius: 10px; font-weight: 800; font-size: 12px; }
+  .ib { border: 1.5px solid var(--line); background: #fff; color: var(--brand); border-radius: 10px; padding: 5px 10px; font-size: 12px; font-weight: 800; font-family: inherit; }
+  .rdet { background: var(--brand-soft); font-size: 13px; color: var(--ink); padding: 10px; }
+  .crow2 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .srow { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .srow .tm { font-weight: 800; color: var(--brand); }
+  .srow .sn { font-weight: 700; }
+  .prow { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .bottomnav { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; box-shadow: 0 -6px 18px rgba(11,18,32,0.12); display: flex; justify-content: space-around; align-items: flex-end; padding: 6px 6px 10px; z-index: 30; }
+  .bottomnav button { background: none; border: none; font-size: 12px; font-weight: 700; color: #475569; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 6px; }
+  .bottomnav button.on { color: var(--brand); }
+  .bottomnav .add { width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; font-size: 30px; margin-top: -28px; justify-content: center; box-shadow: 0 8px 18px rgba(11,18,32,0.3); }
+  @media (min-width: 520px) {
+    .crow { grid-template-columns: repeat(3, 1fr); }
+    .kgrid { grid-template-columns: repeat(4, 1fr); }
+    .crow2 { grid-template-columns: 1fr 1fr; }
+  }
   footer { text-align: center; font-size: 12px; color: #64748b; padding: 10px 0 24px; }
   #printArea { display: none; }
   @media print {
@@ -136,6 +186,13 @@
     <section id="panel-e" class="panel"></section>
     <section id="panel-p" class="panel"></section>
     <section id="panel-biz" class="panel"></section>
+    <nav class="bottomnav">
+      <button class="on" onclick="setTab('dash')">🏠<span>Dashboard</span></button>
+      <button onclick="setTab('e')">👥<span>Clients</span></button>
+      <button class="add" onclick="setTab('n')">+</button>
+      <button onclick="setTab('biz')">📊<span>Reports</span></button>
+      <button onclick="setTab('p')">📄<span>PD / GRT</span></button>
+    </nav>
   </main>
 </div>
 
@@ -271,6 +328,8 @@
     document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
     document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + name));
     if (name === "biz") renderBusiness();
+    document.querySelectorAll(".bottomnav button").forEach(b =>
+      b.classList.toggle("on", b.getAttribute("onclick") === "setTab('" + name + "')"));
   }
 
   // ---------- DASHBOARD ----------
@@ -284,7 +343,7 @@
     return s;
   }
 
-  function renderDashboard() {
+  function renderDashboardOld() {
     const me = currentAccount();
     const recs = getRecords().filter(r => !r.staff || (me && r.staff === me.staff));
     const t = todayKey();
@@ -302,7 +361,7 @@
       return `<tr>
         <td><b>${esc(d.cname || "-")}</b><br><small>${r.type}</small></td>
         <td>${esc(d.product || "-")}</td>
-        <td><span class="pill ${lab}">${lab}</span>${lab === "Passed" ? `<br><small>${money(wf.PassedAmount)}</small>` : ""}
+        <td><span class="pill ${lab}">${lab}</span>${lab === "Passed" ? `` : ""}
           ${lab === "Rejected" ? `<div class="rejReason">${esc(wf.RejectReason || "-")}</div>` : ""}
           ${r.synced ? "" : `<br><span class="pill nosync">Not synced</span>`}</td>
         <td>${assigned}</td>
@@ -315,7 +374,7 @@
       <div class="sched"><b>${fmtDT(s.scheduledAt)}</b> &nbsp; ${esc(s.type || "")} &nbsp; ${esc(s.client || "-")}<br>
         <small>RO: ${esc(s.staff || "-")} &nbsp;|&nbsp; ${esc(s.center || "-")} &nbsp;|&nbsp; ${esc(s.product || "-")} &nbsp;|&nbsp; ${esc(s.status || "Pending")}</small></div>`).join("");
 
-    $("panel-dash").innerHTML = `
+    $("panel-dash").innerHTML = bizSummary() + `
       <div class="card">
         <button class="btn sync" onclick="syncAll()">Sync now (send all)</button>
         <div class="note" style="margin-top:6px">Auto sync every 3 seconds. Last: <span id="lastSync">-</span></div>
@@ -340,8 +399,201 @@
       </div>
 
       <div class="card">
-        <h2>Branch schedule (all ROs)</h2>
+        <h2>GRT / PD time schedule (branch)</h2>
         ${schedItems.length ? sched : `<p class="note">No scheduled GRT / PD yet. Tap Sync to load.</p>`}
+      </div>`;
+  }
+
+  // ---------- RO DASHBOARD ----------
+  let rdFilter = "All";
+  let rdOpen = {};
+
+  const PRODUCT_STYLE = {
+    IGL: "background:#dbeafe;color:#1e40af", IL: "background:#dcfce7;color:#166534",
+    MSME: "background:#f3e8ff;color:#6b21a8", GRT: "background:#ffedd5;color:#9a3412"
+  };
+  const STATUS_STYLE = {
+    Verified: "background:#dcfce7;color:#166534", Passed: "background:#ccfbf1;color:#115e59",
+    Disbursed: "background:#ccfbf1;color:#115e59", Pending: "background:#fef3c7;color:#92400e",
+    Assigned: "background:#ede9fe;color:#5b21b6", Rejected: "background:#fee2e2;color:#991b1b"
+  };
+
+  // What the RO sees for a file: Pending, Assigned, Verified, Passed, Disbursed or Rejected
+  function roStatus(r) {
+    const w = r.wf || {};
+    if (w.Status === "Completed") {
+      if (w.Result !== "Passed") return "Rejected";
+      return w.Disbursed === "Yes" ? "Disbursed" : "Passed";
+    }
+    return w.Status || "Pending";
+  }
+
+  function timeOnly(s) {
+    const d = new Date(s);
+    return isNaN(d) ? String(s || "-") : d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function setRdFilter(f) { rdFilter = f; renderDashboard(); }
+  function toggleRd(id) { rdOpen[id] = !rdOpen[id]; renderDashboard(); }
+
+  function renderDashboard() {
+    const me = currentAccount();
+    if (!me) return;
+    const all = getRecords().filter(r => !r.staff || sameName(r.staff, me.staff));
+    const t = todayKey();
+    const monthKey = t.slice(0, 7);
+    const todayRecs = all.filter(r => r.date === t);
+    const monthRecs = all.filter(r => String(r.date || "").slice(0, 7) === monthKey);
+    const cnt = (list, type) => list.filter(r => r.type === type).length;
+
+    const passed = all.filter(r => ["Passed", "Disbursed"].includes(roStatus(r)));
+    const rejected = all.filter(r => roStatus(r) === "Rejected");
+    const pending = all.filter(r => ["Pending", "Assigned"].includes(roStatus(r)));
+    const verified = all.filter(r => roStatus(r) === "Verified");
+    const passedAmt = passed.reduce((s, r) => s + (Number(r.wf && r.wf.PassedAmount) || 0), 0);
+    const passRate = passed.length + rejected.length
+      ? Math.round(passed.length / (passed.length + rejected.length) * 100) : 0;
+    const reqs = monthRecs.map(r => Number(r.data && r.data.loanReq) || 0).filter(x => x > 0);
+    const avgLoan = reqs.length ? Math.round(reqs.reduce((a, b) => a + b, 0) / reqs.length) : 0;
+
+    const mine = bizData && bizData.rows.find(x => sameName(x.staff, me.staff));
+    const target = mine ? mine.target : 0;
+    const achieved = mine ? mine.achieved : 0;
+    const pct = target > 0 ? Math.min(100, Math.round(achieved / target * 100)) : 0;
+
+    // Verification donut: green = verified/passed, amber = pending, red = rejected
+    const total = all.length || 1;
+    const a = Math.round((verified.length + passed.length) / total * 100);
+    const b = Math.min(100, a + Math.round(pending.length / total * 100));
+    const donutBg = all.length
+      ? `conic-gradient(#16a34a 0 ${a}%, #f59e0b ${a}% ${b}%, #dc2626 ${b}% 100%)`
+      : "conic-gradient(#e5e7eb 0 100%)";
+
+    // Product bars (this month)
+    const bars = [
+      ["IGL", monthRecs.filter(r => r.data && r.data.product === "IGL").length, "#2563eb"],
+      ["GRT", cnt(monthRecs, "GRT"), "#f97316"],
+      ["IL", monthRecs.filter(r => r.data && r.data.product === "IL").length, "#16a34a"],
+      ["MSME", monthRecs.filter(r => r.data && r.data.product === "MSME").length, "#7c3aed"]
+    ];
+    const barMax = Math.max(1, ...bars.map(x => x[1]));
+    const barHtml = bars.map(([label, n, col]) => `
+      <div class="bcol"><b>${n}</b>
+        <div class="bar" style="height:${Math.round(n / barMax * 90) + 6}px;background:${col}"></div>
+        <small>${label}</small></div>`).join("");
+
+    // Files table with filter
+    const filterOf = r => {
+      const s = roStatus(r);
+      if (rdFilter === "All") return true;
+      if (rdFilter === "Pending") return s === "Pending" || s === "Assigned";
+      if (rdFilter === "Verified") return s === "Verified" || s === "Passed" || s === "Disbursed";
+      return s === rdFilter;
+    };
+    const list = all.slice().sort((x, y) => y.id - x.id).filter(filterOf).slice(0, 20);
+    const fl = (name, n) => `<button class="${rdFilter === name ? "on" : ""}" onclick="setRdFilter('${name}')">${name} (${n})</button>`;
+    const rowsHtml = list.map((r, i) => {
+      const d = r.data || {};
+      const w = r.wf || {};
+      const s = roStatus(r);
+      const id = String(r.id);
+      return `
+        <tr>
+          <td>${i + 1}</td>
+          <td><b>${esc(d.cname || "-")}</b><br><small>${esc(d.mobile || "")}</small></td>
+          <td><span class="chip" style="${PRODUCT_STYLE[d.product] || PRODUCT_STYLE[r.type] || ""}">${esc(d.product || r.type)}</span></td>
+          <td>${money(Number(d.loanReq) || 0)}</td>
+          <td><span class="sp" style="${STATUS_STYLE[s] || ""}">${s}</span><br><small>${esc(r.date || "")} ${esc(r.time || "")}</small></td>
+          <td>${esc(w.AssignedBCM || "-")}</td>
+          <td><button class="ib" onclick="toggleRd('${id}')">${rdOpen[id] ? "Hide" : "View"}</button></td>
+        </tr>${rdOpen[id] ? `
+        <tr><td colspan="7" class="rdet">
+          Type: ${esc(r.type)} &nbsp;|&nbsp; Place: ${esc(d.place || "-")} &nbsp;|&nbsp; Center: ${esc(d.center || "-")}<br>
+          GRT / PD time: ${fmtDT(w.ScheduledAt || d.scheduledAt)}
+          ${w.RejectReason ? `<br>Reason: <b>${esc(w.RejectReason)}</b>` : ""}
+          ${w.Disbursed === "Yes" ? `<br>Loan disbursed` : ""}
+        </td></tr>` : ""}`;
+    }).join("");
+
+    // Today's schedule (this RO's visits)
+    const todaySched = (schedItems || [])
+      .filter(s => sameName(s.staff, me.staff) && String(s.scheduledAt).slice(0, 10) === t)
+      .sort((x, y) => String(x.scheduledAt) < String(y.scheduledAt) ? -1 : 1);
+    const schedHtml = todaySched.length ? todaySched.map(s => `
+        <div class="srow">
+          <span class="tm">${timeOnly(s.scheduledAt)}</span>
+          <span class="sn">${esc(s.client || "-")}</span>
+          <span class="chip" style="${PRODUCT_STYLE[s.product] || PRODUCT_STYLE[s.type] || ""}">${esc(s.product || s.type)}</span>
+        </div>`).join("")
+      : `<p class="note">No visits scheduled today.</p>`;
+
+    $("panel-dash").innerHTML = `
+      <div class="card">
+        <div class="syncRow">
+          <button class="btn full" style="margin:0" onclick="syncAll()">Sync now (send all)</button>
+          <div class="lastsync">Last sync<b id="lastSync">-</b></div>
+        </div>
+        <div id="syncMsg" class="msg"></div>
+      </div>
+
+      <div class="kgrid">
+        <div class="kpi k1"><div class="big">${cnt(todayRecs, "GRT")}</div><div class="lbl">Today GRT</div><div class="sub">This month: ${cnt(monthRecs, "GRT")}</div></div>
+        <div class="kpi k2"><div class="big">${cnt(todayRecs, "PD")}</div><div class="lbl">Today PD</div><div class="sub">This month: ${cnt(monthRecs, "PD")}</div></div>
+        <div class="kpi k3"><div class="big">${monthRecs.length}</div><div class="lbl">Total clients</div><div class="sub">All time: ${all.length}</div></div>
+        <div class="kpi k4"><div class="big">${money(passedAmt)}</div><div class="lbl">Passed amount</div><div class="sub">Passed loans: ${passed.length}</div></div>
+      </div>
+
+      <div class="crow">
+        <div class="card mini">
+          <h3>Verification status</h3>
+          <div class="donut" style="background:${donutBg}"><span><b style="font-size:20px">${all.length}</b><small>Total</small></span></div>
+          <div class="legend">
+            <div><span><i class="dot" style="background:#16a34a"></i>Verified</span><b>${verified.length + passed.length}</b></div>
+            <div><span><i class="dot" style="background:#f59e0b"></i>Pending</span><b>${pending.length}</b></div>
+            <div><span><i class="dot" style="background:#dc2626"></i>Rejected</span><b>${rejected.length}</b></div>
+          </div>
+        </div>
+        <div class="card mini">
+          <h3>Product wise <small style="font-weight:600">(this month)</small></h3>
+          <div class="bars">${barHtml}</div>
+        </div>
+        <div class="card mini">
+          <h3>My target progress</h3>
+          <div class="ring" style="background:conic-gradient(#16a34a ${pct}%, #e5e7eb 0)"><span><b style="font-size:20px">${pct}%</b></span></div>
+          <div class="legend">
+            <div><span>Monthly target</span><b>${money(target)}</b></div>
+            <div><span>Achieved</span><b style="color:#15803d">${money(achieved)}</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fpills">
+        ${fl("All", all.length)}${fl("Pending", pending.length)}${fl("Verified", verified.length + passed.length)}${fl("Rejected", rejected.length)}
+      </div>
+
+      <div class="card">
+        <h2>My GRT / PD files</h2>
+        <div class="twrap">
+          <table class="ftable">
+            <tr><th>#</th><th>Client / mobile</th><th>Product</th><th>Amount</th><th>Status</th><th>Assigned</th><th></th></tr>
+            ${rowsHtml || `<tr><td colspan="7" class="note">No files in this filter.</td></tr>`}
+          </table>
+        </div>
+      </div>
+
+      <div class="crow2">
+        <div class="card">
+          <h2>Today schedule</h2>
+          ${schedHtml}
+        </div>
+        <div class="card">
+          <h2>Performance overview <small style="font-weight:600">(this month)</small></h2>
+          <div class="prow"><span>Monthly target</span><b>${money(target)}</b></div>
+          <div class="prow"><span>Achieved amount</span><b style="color:#15803d">${money(achieved)}</b></div>
+          <div class="prow"><span>Total clients</span><b>${monthRecs.length}</b></div>
+          <div class="prow"><span>Pass rate</span><b>${passRate}%</b></div>
+          <div class="prow"><span>Avg loan amount</span><b>${money(avgLoan)}</b></div>
+        </div>
       </div>`;
   }
 
@@ -833,6 +1085,29 @@
       </div>`;
   }
 
+  function bizSummary() {
+    const me = currentAccount();
+    if (!bizData || !me) {
+      return `<div class="card"><h2>Business performance</h2><p class="note">Tap Sync now to load your performance.</p></div>`;
+    }
+    const mine = bizData.rows.find(r => sameName(r.staff, me.staff));
+    if (!mine) {
+      return `<div class="card"><h2>Business performance</h2><p class="note">Your targets are not set yet. Ask your BRM.</p></div>`;
+    }
+    return `
+      <div class="card">
+        <h2>Business performance - ${bizData.period}</h2>
+        <div class="stats">
+          <div class="stat s5"><div class="num">${mine.count}</div><div class="lbl">Loans</div></div>
+          <div class="stat s3"><div class="num">${money(mine.achieved)}</div><div class="lbl">Achieved</div></div>
+          <div class="stat s4"><div class="num">${money(mine.target)}</div><div class="lbl">Target</div></div>
+          <div class="stat s1"><div class="num">${money(mine.balance)}</div><div class="lbl">Balance target</div></div>
+        </div>
+        <p class="note">DRR set by BRM: <b>${money(mine.drrPublished)}</b> per day &middot; Balance working days: <b>${bizData.balanceDays}</b></p>
+        <p class="note">Full details in the Business tab.</p>
+      </div>`;
+  }
+
   // ---------- AUTO SYNC EVERY 3 SECONDS ----------
   let autoTimer = null, autoBusy = false;
 
@@ -872,8 +1147,9 @@
 
       // Latest status from BCM / BRM, and the branch schedule
       await refreshStatuses();
-      const schedChanged = await fetchSchedule();
-      const bizChanged = await fetchBusiness();
+      let schedChanged = false, bizChanged = false;
+      try { schedChanged = await fetchSchedule(); } catch (e) {}
+      try { bizChanged = await fetchBusiness(); } catch (e) {}
 
       const after = JSON.stringify(getRecords().map(r => [r.id, r.wf, r.synced]));
       if (before !== after || schedChanged) renderDashboard();
