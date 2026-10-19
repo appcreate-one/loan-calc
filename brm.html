@@ -1,3 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4c1d95">
+<title>BRM Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; background: #f5f3ff; color: #1e1b4b; }
+  header { background: linear-gradient(135deg, #4c1d95, #db2777); color: #fff; padding: 14px; text-align: center; }
+  header h1 { font-size: 18px; }
+  #clock, #who { font-size: 12px; margin-top: 4px; opacity: 0.95; }
+  .wrap { max-width: 600px; margin: 0 auto; padding: 12px; }
+  .card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-left: 6px solid #db2777; }
+  .card.Pending { border-left-color: #f59e0b; }
+  .card.Assigned { border-left-color: #7c3aed; }
+  .card.Verified { border-left-color: #2563eb; }
+  .card.Passed { border-left-color: #16a34a; }
+  .card.Rejected { border-left-color: #dc2626; }
+  .card h2 { font-size: 16px; color: #4c1d95; margin-bottom: 8px; }
+  label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin: 10px 0 4px; }
+  input, select { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; }
+  .btn { padding: 12px 8px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; color: #fff; background: linear-gradient(135deg, #4c1d95, #db2777); font-family: Arial, sans-serif; }
+  .btn.full { width: 100%; margin-top: 10px; }
+  .btn.sm { padding: 8px 12px; font-size: 12px; }
+  .btn.del { background: #dc2626; }
+  .btn.off { background: #e2e8f0; color: #334155; }
+  .btn.yes { background: #16a34a; }
+  .btn.no { background: #64748b; }
+  .msg { font-size: 13px; color: #b91c1c; margin-top: 10px; min-height: 16px; }
+  .msg.ok { color: #15803d; }
+  .syncBar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #475569; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tabs button { flex: 1; padding: 10px 4px; border: none; border-radius: 999px; background: #fff; color: #4c1d95; font-weight: bold; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); font-family: Arial, sans-serif; }
+  .tabs button.on { background: linear-gradient(135deg, #4c1d95, #db2777); color: #fff; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { border-radius: 12px; padding: 10px 4px; text-align: center; color: #fff; }
+  .stat .n { font-size: 20px; font-weight: bold; }
+  .stat .l { font-size: 11px; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filters button { flex: 1; padding: 8px 4px; border: none; border-radius: 999px; background: #fff; color: #4c1d95; font-weight: bold; font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); font-family: Arial, sans-serif; }
+  .filters button.on { background: #7c3aed; color: #fff; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .name { font-size: 16px; font-weight: bold; }
+  .pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; color: #fff; font-weight: bold; }
+  .pill.Pending { background: #f59e0b; }
+  .pill.Assigned { background: #7c3aed; }
+  .pill.Verified { background: #2563eb; }
+  .pill.Passed { background: #16a34a; }
+  .pill.Rejected { background: #dc2626; }
+  .small { font-size: 13px; color: #475569; margin-top: 6px; line-height: 1.6; }
+  .row2 { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
+  .disb { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e9d5ff; font-size: 14px; font-weight: bold; color: #4c1d95; }
+  .disb div { display: flex; gap: 6px; }
+  .disb .btn { padding: 8px 14px; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tbl th, .tbl td { border-bottom: 1px solid #e9d5ff; padding: 6px 4px; text-align: left; }
+  .tbl th { color: #4c1d95; }
+  .scroll { overflow-x: auto; }
+  .staff { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e9d5ff; font-size: 15px; }
+  .staff small { color: #64748b; }
+  .note { font-size: 12px; color: #64748b; margin-top: 6px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .calc { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; font-size: 13px; background: #f5f3ff; border-radius: 10px; padding: 10px; }
+  .btns2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .btn.yes { background: #16a34a; }
+  @media (max-width: 380px) { .grid, .calc { grid-template-columns: 1fr; } }
+  @media (max-width: 380px) { .stats { grid-template-columns: 1fr 1fr; } }
+</style>
+<link rel="stylesheet" href="h2h.css">
+<link rel="manifest" href="manifest-brm.json">
+<link rel="icon" href="BRM_H2H_512.png">
+<link rel="apple-touch-icon" href="BRM_H2H_512.png">
+</head>
+<body data-theme="brm">
+
+<header>
+  <img class="brand" src="BRM_H2H_512.png" alt="H2H">
+  <h1>H2H &middot; Branch Head</h1>
+  <div id="clock"></div>
+  <div id="who"></div>
+</header>
+
+<!-- LOGIN -->
+<div class="wrap" id="loginView">
+  <div class="card">
+    <h2>BRM login</h2>
+    <label>Branch name</label>
+    <input id="aBranch" type="text">
+    <label>Your name</label>
+    <input id="aName" type="text">
+    <label>Password</label>
+    <input id="aPass" type="password">
+    <button class="btn full" onclick="login()">Login</button>
+    <div id="aMsg" class="msg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="wrap" id="appView" style="display:none">
+  <div class="syncBar">
+    <span>Auto sync every 3 sec &nbsp;|&nbsp; last: <b id="lastSync">-</b></span>
+    <button class="btn sm" onclick="manualSync()">Sync now</button>
+  </div>
+  <div class="tabs">
+    <button id="tFiles" class="on" onclick="setView('files')">Files</button>
+    <button id="tSum" onclick="setView('sum')">Summary</button>
+    <button id="tStaff" onclick="setView('staff')">Staff</button>
+    <button id="tPerf" onclick="setView('perf')">RO Performance</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <div id="filesView"></div>
+  <div id="sumView" style="display:none"></div>
+  <div id="staffView" style="display:none"></div>
+  <div id="perfView" style="display:none"></div>
+</div>
+
+<script>
+  // Only the web app URL goes here. No keys are stored in this page.
+  const SYNC_URL = "https://script.google.com/macros/s/AKfycbxRCx6N62C3ke8ZVZDi_nNojd4F_DtUUEAh4LWu66LhCy7m-JuXeGKaaaKqjRuohEZi/exec";
+
+  let token = "", me = null, recs = [], bcms = [], staffList = [];
+  let filter = "All", view = "files", lastSig = "", pending = false, autoTimer = null, autoBusy = false, lastTime = "-";
+  const $ = id => document.getElementById(id);
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function fmt(s) {
+    if (!s) return "-";
+    const d = new Date(s);
+    return isNaN(d) ? String(s) : d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  }
+  function money(n) {
+    return (n === "" || n === null || n === undefined || !isFinite(n)) ? "-" : "\u20B9" + Number(n).toLocaleString("en-IN");
+  }
+  function same(a, b) { return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); }
+  function clock() {
+    $("clock").textContent = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  clock();
+  setInterval(clock, 30000);
+
+  // Server calls
+  async function post(p) {
+    if (SYNC_URL.startsWith("PASTE")) throw new Error("Set SYNC_URL in brm.html first.");
+    const res = await fetch(SYNC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(Object.assign({ token: token }, p))
+    });
+    return res.json();
+  }
+  async function get(params) {
+    const q = Object.entries(Object.assign({ token: token }, params))
+      .map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+    return (await fetch(SYNC_URL + "?" + q)).json();
+  }
+
+  // Login
+  async function login() {
+    const branch = $("aBranch").value.trim(), staff = $("aName").value.trim(), password = $("aPass").value;
+    if (!branch || !staff || !password) { $("aMsg").textContent = "Fill in all fields."; return; }
+    try {
+      const res = await post({ action: "login", branch: branch, staff: staff, password: password });
+      if (!res.ok) { $("aMsg").textContent = res.error; return; }
+      if (res.role !== "BRM") { $("aMsg").textContent = "This login is not a BRM account."; return; }
+      token = res.token;
+      me = res;
+      await loadAll();
+      $("loginView").style.display = "none";
+      $("appView").style.display = "block";
+      $("who").textContent = "Branch: " + me.branch + "  |  BRM: " + me.staff;
+      render();
+      startAutoSync();
+    } catch (e) {
+      $("aMsg").textContent = e.message || "Could not connect. Check internet.";
+    }
+  }
+
+  function logout() {
+    clearInterval(autoTimer);
+    location.reload();
+  }
+
+  // Loads files, BCM list and staff list. Returns true if the files changed.
+  async function loadAll() {
+    const r = await get({ action: "records" });
+    if (!r.ok) throw new Error(r.error);
+    const sig = JSON.stringify(r.records);
+    const changed = sig !== lastSig;
+    lastSig = sig;
+    recs = r.records;
+    const b = await get({ action: "bcms" });
+    bcms = b.ok ? b.bcms : [];
     const s = await get({ action: "staff" });
     staffList = s.ok ? s.staff : [];
     lastTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
