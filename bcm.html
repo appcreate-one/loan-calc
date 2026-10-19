@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f766e">
+<title>BCM Verification</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; background: #ecfdf5; color: #0f172a; }
+  header { background: linear-gradient(135deg, #0f766e, #0d9488); color: #fff; padding: 14px; text-align: center; }
+  header h1 { font-size: 18px; }
+  #clock, #who { font-size: 12px; margin-top: 4px; opacity: 0.95; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 12px; }
+  .card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-left: 6px solid #0d9488; }
+  .card.Pending { border-left-color: #f59e0b; }
+  .card.Assigned { border-left-color: #7c3aed; }
+  .card.Verified { border-left-color: #2563eb; }
+  .card.Passed { border-left-color: #16a34a; }
+  .card.Rejected { border-left-color: #dc2626; }
+  .card h2 { font-size: 16px; color: #0f766e; margin-bottom: 8px; }
+  label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin: 10px 0 4px; }
+  input, select { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; }
+  .btn { padding: 12px 6px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; color: #fff; background: #0d9488; font-family: Arial, sans-serif; }
+  .btn.full { width: 100%; margin-top: 10px; }
+  .btn.sm { padding: 8px 12px; font-size: 12px; }
+  .btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
+  .btns .pass { background: #16a34a; }
+  .btns .rej { background: #dc2626; }
+  .btns .ver { background: #2563eb; }
+  .msg { font-size: 13px; color: #b91c1c; margin-top: 10px; min-height: 16px; }
+  .syncBar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #475569; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tabs button { flex: 1; padding: 10px 4px; border: none; border-radius: 999px; background: #fff; color: #0f766e; font-weight: bold; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); font-family: Arial, sans-serif; }
+  .tabs button.on { background: linear-gradient(135deg, #0f766e, #0d9488); color: #fff; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { border-radius: 12px; padding: 10px 4px; text-align: center; color: #fff; }
+  .stat .n { font-size: 20px; font-weight: bold; }
+  .stat .l { font-size: 11px; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filters button { flex: 1; padding: 8px 4px; border: none; border-radius: 999px; background: #fff; color: #0f766e; font-weight: bold; font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); font-family: Arial, sans-serif; }
+  .filters button.on { background: #0d9488; color: #fff; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .name { font-size: 16px; font-weight: bold; }
+  .pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; color: #fff; font-weight: bold; }
+  .pill.Pending { background: #f59e0b; }
+  .pill.Assigned { background: #7c3aed; }
+  .pill.Verified { background: #2563eb; }
+  .pill.Passed { background: #16a34a; }
+  .pill.Rejected { background: #dc2626; }
+  .small { font-size: 13px; color: #475569; margin-top: 6px; line-height: 1.6; }
+  .form { margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 6px; }
+  .note { font-size: 12px; color: #64748b; margin-top: 6px; }
+  @media (max-width: 380px) { .stats { grid-template-columns: 1fr 1fr; } }
+</style>
+<link rel="stylesheet" href="h2h.css">
+<link rel="manifest" href="manifest-bcm.json">
+<link rel="icon" href="BCM_H2H_512.png">
+<link rel="apple-touch-icon" href="BCM_H2H_512.png">
+</head>
+<body data-theme="bcm">
+
+<header>
+  <img class="brand" src="BCM_H2H_512.png" alt="H2H">
+  <h1>H2H &middot; Verification</h1>
+  <div id="clock"></div>
+  <div id="who"></div>
+</header>
+
+<!-- LOGIN -->
+<div class="wrap" id="loginView">
+  <div class="card">
+    <h2>BCM login</h2>
+    <label>Branch name</label>
+    <input id="aBranch" type="text">
+    <label>Staff name</label>
+    <input id="aName" type="text">
+    <label>Password</label>
+    <input id="aPass" type="password">
+    <button class="btn full" onclick="login()">Login</button>
+    <div id="aMsg" class="msg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="wrap" id="appView" style="display:none">
+  <div class="syncBar">
+    <span>Auto sync every 3 sec &nbsp;|&nbsp; last: <b id="lastSync">-</b></span>
+    <button class="btn sm" onclick="manualSync()">Sync now</button>
+  </div>
+  <div class="tabs">
+    <button id="tFiles" class="on" onclick="setView('files')">Files</button>
+    <button id="tUp" onclick="setView('up')">Upcoming</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <div id="stats" class="stats"></div>
+  <div id="filesView">
+    <div class="filters" id="filters"></div>
+    <div id="list"></div>
+  </div>
+  <div id="upView" style="display:none"></div>
+</div>
+
+<script>
+  // Only the web app URL goes here. No keys are stored in this page.
+  const SYNC_URL = "PASTE_WEB_APP_URL_HERE";
+  const REJECT_REASONS = ["Documents missing", "Income not verified", "House not verified",
+                          "Client not available", "Other"];
+
+  let token = "", me = null, recs = [], filter = "All", view = "files";
+  let lastSig = "", pending = false, autoTimer = null, autoBusy = false, lastTime = "-";
+  const $ = id => document.getElementById(id);
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function fmt(s) {
+    if (!s) return "-";
+    const d = new Date(s);
+    return isNaN(d) ? String(s) : d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  }
+  function money(n) {
+    return (n === "" || n === null || n === undefined || !isFinite(n)) ? "-" : "\u20B9" + Number(n).toLocaleString("en-IN");
+  }
+  function same(a, b) { return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); }
+  function clock() {
+    $("clock").textContent = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  clock();
+  setInterval(clock, 30000);
+
+  // Server calls
+  async function post(p) {
+    if (SYNC_URL.startsWith("PASTE")) throw new Error("Set SYNC_URL in bcm.html first.");
+    const res = await fetch(SYNC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(Object.assign({ token: token }, p))
+    });
+    return res.json();
+  }
+  async function get(params) {
+    const q = Object.entries(Object.assign({ token: token }, params))
+      .map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+    return (await fetch(SYNC_URL + "?" + q)).json();
+  }
+
+  // Login
+  async function login() {
+    const branch = $("aBranch").value.trim(), staff = $("aName").value.trim(), password = $("aPass").value;
+    if (!branch || !staff || !password) { $("aMsg").textContent = "Fill in all fields."; return; }
+    try {
+      const res = await post({ action: "login", branch: branch, staff: staff, password: password });
+      if (!res.ok) { $("aMsg").textContent = res.error; return; }
+      if (res.role !== "BCM") { $("aMsg").textContent = "This login is not a BCM account."; return; }
+      token = res.token;
+      me = res;
+      await loadRecords();
+      $("loginView").style.display = "none";
+      $("appView").style.display = "block";
+      $("who").textContent = "Branch: " + me.branch + "  |  BCM: " + me.staff;
+      render();
+      startAutoSync();
+    } catch (e) {
+      $("aMsg").textContent = e.message || "Could not connect. Check internet.";
+    }
+  }
+
+  function logout() {
+    clearInterval(autoTimer);
+    location.reload();
+  }
+
+  // Loads all files for the branch. Returns true if anything changed.
+  async function loadRecords() {
+    const r = await get({ action: "records" });
+    if (!r.ok) throw new Error(r.error);
+    const sig = JSON.stringify(r.records);
+    const changed = sig !== lastSig;
+    lastSig = sig;
+    recs = r.records;
+    lastTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return changed;
+  }
+
+  // Don't redraw while the user is typing or has a form open
+  function busy() {
+    const a = document.activeElement;
+    if (a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA")) return true;
+    return !!document.querySelector('.form[style*="block"]');
+  }
+
+  // Automatic sync every 3 seconds
+  function startAutoSync() {
+    if (autoTimer) return;
+    autoTimer = setInterval(autoSync, 3000);
+  }
+
+  async function autoSync() {
+    if (!me || autoBusy) return;
+    autoBusy = true;
+    try {
+      if (await loadRecords()) pending = true;
+      if (pending && !busy()) { pending = false; render(); }
+      else { $("lastSync").textContent = lastTime; }
+    } catch (e) {
+    } finally {
+      autoBusy = false;
+    }
+  }
+
+  async function manualSync() {
+    try {
+      await loadRecords();
+      pending = false;
+      render();
+    } catch (e) { alert("Sync failed: " + e.message); }
+  }
+
+  function setView(v) {
+    view = v;
+    $("tFiles").classList.toggle("on", v === "files");
+    $("tUp").classList.toggle("on", v === "up");
+    $("filesView").style.display = v === "files" ? "block" : "none";
+    $("upView").style.display = v === "up" ? "block" : "none";
+    render();
+  }
+
+  function setFilter(f) { filter = f; render(); }
+
+  function render() {
+    const c = { Pending: 0, Assigned: 0, Verified: 0, Passed: 0, Rejected: 0, amt: 0 };
+    recs.forEach(r => {
+      const s = r.Status || "Pending";
+      if (c[s] !== undefined) c[s]++;
+      if (r.Result === "Passed") { c.Passed++; c.amt += Number(r["Passed Amount"]) || 0; }
+      if (r.Result === "Rejected") c.Rejected++;
+    });
+    $("stats").innerHTML = `
+      <div class="stat" style="background:#f59e0b"><div class="n">${c.Pending + c.Assigned}</div><div class="l">To verify</div></div>
+      <div class="stat" style="background:#2563eb"><div class="n">${c.Verified}</div><div class="l">Verified</div></div>
+      <div class="stat" style="background:#16a34a"><div class="n">${c.Passed}</div><div class="l">Passed</div></div>
+      <div class="stat" style="background:#dc2626"><div class="n">${c.Rejected}</div><div class="l">Rejected</div></div>
+      <div class="stat" style="background:#0d9488;grid-column:span 2"><div class="n">${money(c.amt)}</div><div class="l">Total passed loan amount</div></div>`;
+    $("lastSync").textContent = lastTime;
+
+    if (view === "files") renderFiles(); else renderUpcoming();
+  }
+
+  function renderFiles() {
+    const opts = ["All", "Pending", "Assigned", "Verified", "Completed"];
+    $("filters").innerHTML = opts.map(f =>
+      `<button class="${f === filter ? "on" : ""}" onclick="setFilter('${f}')">${f}</button>`).join("");
+    const list = recs.filter(r => filter === "All" || (r.Status || "Pending") === filter);
+    $("list").innerHTML = list.length ? list.map(card).join("") : `<div class="card">No files.</div>`;
+  }
+
+  function card(r) {
+    const d = (r.Data && r.Data.data) || {};
+    const id = String(r.ID);
+    const st = r.Status || "Pending";
+    const bcm = r["Assigned BCM"] || "";
+    const mine = !bcm || same(bcm, me.staff);
+    const shown = st === "Completed" ? (r.Result || "Completed") : st;
+
+    let result = "";
+    if (st === "Completed") {
+      if (r.Result === "Passed") {
+        const dis = r["Disbursed"] === "Yes" ? "Yes" : "Not yet";
+        result = `<div class="small"><b>Passed: ${money(r["Passed Amount"])}</b> &nbsp;|&nbsp; Loan disbursed: <b>${dis}</b></div>`;
+      } else {
+        result = `<div class="small"><b>Rejected: ${esc(r["Reject Reason"] || "-")}</b></div>`;
+      }
+    }
+
+    let actions = "";
+    if (st === "Completed") {
+      actions = "";
+    } else if (!mine) {
+      actions = `<div class="note">Assigned to ${esc(bcm)}</div>`;
+    } else {
+      actions = `
+        <div class="btns">
+          ${st !== "Verified" ? `<button class="btn ver" onclick="verify('${id}')">Verify</button>` : `<span></span>`}
+          <button class="btn pass" onclick="toggleForm('${id}','pass')">Pass</button>
+          <button class="btn rej" onclick="toggleForm('${id}','rej')">Reject</button>
+        </div>
+        <div class="form" id="fp-${id}" style="display:none">
+          <label>Passed loan amount (₹)</label>
+          <input id="amt-${id}" type="number" inputmode="decimal">
+          <button class="btn full" onclick="complete('${id}','Passed')">Save as passed</button>
+        </div>
+        <div class="form" id="fr-${id}" style="display:none">
+          <label>Rejection reason</label>
+          <select id="rs-${id}">${REJECT_REASONS.map(x => `<option>${x}</option>`).join("")}</select>
+          <label>Details (optional)</label>
+          <input id="rt-${id}" type="text">
+          <button class="btn full" onclick="complete('${id}','Rejected')">Save as rejected</button>
+        </div>`;
+    }
+
+    return `
+      <div class="card ${shown}">
+        <div class="top">
+          <span class="name">${esc(d.cname || r.Client || "-")}</span>
+          <span class="pill ${shown}">${shown}</span>
+        </div>
+        <div class="small">
+          RO: ${esc(r.Staff || "-")} &nbsp;|&nbsp; ${esc(r.Type || "")} &nbsp;|&nbsp; ${esc(d.product || r.Product || "-")}<br>
+          Center: ${esc(d.center || r.Center || "-")} &nbsp;|&nbsp; Mobile: ${esc(d.mobile || r.Mobile || "-")}<br>
+          Requested: ${money(r["Requested Amount"])} &nbsp;|&nbsp; Scheduled: ${fmt(r["Scheduled At"])}<br>
+          Assigned BCM: ${esc(bcm || "-")}
+        </div>
+        ${result}
+        ${actions}
+      </div>`;
+  }
+
+  function toggleForm(id, which) {
+    const a = $("fp-" + id), b = $("fr-" + id);
+    if (which === "pass") {
+      b.style.display = "none";
+      a.style.display = a.style.display === "block" ? "none" : "block";
+    } else {
+      a.style.display = "none";
+      b.style.display = b.style.display === "block" ? "none" : "block";
+    }
+    render();
+  }
+
+  async function verify(id) {
+    try {
+      const res = await post({ action: "verify", id: id });
+      if (!res.ok) throw new Error(res.error);
+      await loadRecords();
+      render();
+    } catch (e) { alert(e.message); }
+  }
+
+  async function complete(id, result) {
+    let payload = { action: "complete", id: id, result: result };
+    if (result === "Passed") {
+      payload.amount = $("amt-" + id).value;
+    } else {
+      const reason = $("rs-" + id).value;
+      const extra = $("rt-" + id).value.trim();
+      payload.reason = extra ? reason + " - " + extra : reason;
+    }
+    try {
+      const res = await post(payload);
+      if (!res.ok) throw new Error(res.error);
+      await loadRecords();
+      render();
+    } catch (e) { alert(e.message); }
+  }
+
+  // Upcoming GRT/PD: scheduled files that are not completed yet
+  function renderUpcoming() {
+    const cutoff = Date.now() - 3600000;
+    const list = recs
+      .filter(r => r["Scheduled At"] && new Date(r["Scheduled At"]).getTime() >= cutoff && (r.Status || "Pending") !== "Completed")
+      .sort((a, b) => new Date(a["Scheduled At"]) - new Date(b["Scheduled At"]));
+    $("upView").innerHTML = list.length
+      ? list.map(r => {
+          const d = (r.Data && r.Data.data) || {};
+          return `<div class="card">
+            <div class="top"><span class="name">${fmt(r["Scheduled At"])}</span>
+              <span class="pill ${r.Status || "Pending"}">${r.Status || "Pending"}</span></div>
+            <div class="small">${esc(d.cname || r.Client || "-")} &nbsp;|&nbsp; ${esc(r.Type || "")} &nbsp;|&nbsp; ${esc(d.product || r.Product || "-")}<br>
+            Place: ${esc(d.place || r.Center || "-")} &nbsp;|&nbsp; RO: ${esc(r.Staff || "-")}</div>
+          </div>`;
+        }).join("")
+      : `<div class="card">No upcoming GRT/PD.</div>`;
+  }
+</script>
+</body>
+</html>
