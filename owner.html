@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1e293b">
+<title>Head Office - Branches</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; background: #f1f5f9; color: #0f172a; }
+  header { background: linear-gradient(135deg, #1e293b, #334155); color: #fff; padding: 14px; text-align: center; }
+  header h1 { font-size: 18px; }
+  #clock, #who { font-size: 12px; margin-top: 4px; opacity: 0.95; }
+  .wrap { max-width: 600px; margin: 0 auto; padding: 12px; }
+  .card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-left: 6px solid #334155; }
+  .card h2 { font-size: 16px; color: #1e293b; margin-bottom: 8px; }
+  label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin: 10px 0 4px; }
+  input, select { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; }
+  .btn { padding: 12px 8px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; color: #fff; background: linear-gradient(135deg, #1e293b, #334155); font-family: Arial, sans-serif; }
+  .btn.full { width: 100%; margin-top: 10px; }
+  .btn.sm { padding: 8px 12px; font-size: 12px; }
+  .msg { font-size: 13px; color: #b91c1c; margin-top: 10px; min-height: 16px; }
+  .msg.ok { color: #15803d; }
+  .syncBar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #475569; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { border-radius: 12px; padding: 10px 4px; text-align: center; color: #fff; }
+  .stat .n { font-size: 20px; font-weight: bold; }
+  .stat .l { font-size: 11px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .name { font-size: 17px; font-weight: bold; }
+  .pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; color: #fff; font-weight: bold; background: #334155; }
+  .role { display: grid; grid-template-columns: 70px 1fr; gap: 6px; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
+  .role b { color: #475569; }
+  .role:last-child { border-bottom: none; }
+  .totals { font-size: 13px; color: #334155; margin-top: 8px; line-height: 1.7; }
+  .none { color: #94a3b8; font-style: italic; }
+  .note { font-size: 12px; color: #64748b; margin-top: 6px; }
+  @media (max-width: 380px) { .stats { grid-template-columns: 1fr 1fr; } }
+</style>
+<link rel="stylesheet" href="h2h.css">
+<link rel="manifest" href="manifest-ho.json">
+<link rel="icon" href="HO_H2H_512.png">
+<link rel="apple-touch-icon" href="HO_H2H_512.png">
+</head>
+<body data-theme="owner">
+
+<header>
+  <img class="brand" src="HO_H2H_512.png" alt="H2H HO">
+  <h1>H2H &middot; Head Office</h1>
+  <div id="clock"></div>
+  <div id="who"></div>
+</header>
+
+<!-- LOGIN -->
+<div class="wrap" id="loginView">
+  <div class="card">
+    <h2>Owner login</h2>
+    <label>Branch name</label>
+    <input id="aBranch" type="text" value="HEAD OFFICE">
+    <label>Owner name</label>
+    <input id="aName" type="text">
+    <label>Password</label>
+    <input id="aPass" type="password">
+    <button class="btn full" onclick="login()">Login</button>
+    <div id="aMsg" class="msg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="wrap" id="appView" style="display:none">
+  <div class="syncBar">
+    <span>Auto sync every 3 sec &nbsp;|&nbsp; last: <b id="lastSync">-</b></span>
+    <button class="btn sm" onclick="manualSync()">Sync now</button>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="branches"></div>
+
+  <div class="card">
+    <h2>Add a new branch</h2>
+    <p class="note">Creates the branch and its BRM (branch head). The BRM logs in to the BRM app with the branch name, their name and this password.</p>
+    <label>Branch name</label>
+    <input id="bBranch" type="text">
+    <label>BRM name (branch head)</label>
+    <input id="bBrm" type="text">
+    <label>BRM password (at least 6 characters)</label>
+    <input id="bPass" type="password">
+    <button class="btn full" onclick="addBranch()">Create branch</button>
+    <div id="bMsg" class="msg"></div>
+  </div>
+
+  <div class="card">
+    <h2>Reset a BRM password</h2>
+    <label>Branch name</label>
+    <input id="rBranch" type="text" list="branchNames">
+    <datalist id="branchNames"></datalist>
+    <label>BRM name</label>
+    <input id="rBrm" type="text">
+    <label>New password (at least 6 characters)</label>
+    <input id="rPass" type="password">
+    <button class="btn full" onclick="resetBrm()">Reset password</button>
+    <div id="rMsg" class="msg"></div>
+  </div>
+</div>
+
+<script>
+  // Only the web app URL goes here. No keys are stored in this page.
+  const SYNC_URL = "PASTE_WEB_APP_URL_HERE";
+
+  let token = "", me = null, branches = [];
+  let lastSig = "", pending = false, autoTimer = null, autoBusy = false, lastTime = "-";
+  const $ = id => document.getElementById(id);
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function money(n) {
+    return (n === "" || n === null || n === undefined || !isFinite(n)) ? "\u20B90" : "\u20B9" + Number(n).toLocaleString("en-IN");
+  }
+  function clock() {
+    $("clock").textContent = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  clock();
+  setInterval(clock, 30000);
+
+  // Server calls
+  async function post(p) {
+    if (SYNC_URL.startsWith("PASTE")) throw new Error("Set SYNC_URL in owner.html first.");
+    const res = await fetch(SYNC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(Object.assign({ token: token }, p))
+    });
+    return res.json();
+  }
+  async function get(params) {
+    const q = Object.entries(Object.assign({ token: token }, params))
+      .map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+    return (await fetch(SYNC_URL + "?" + q)).json();
+  }
+
+  // Login
+  async function login() {
+    const branch = $("aBranch").value.trim(), staff = $("aName").value.trim(), password = $("aPass").value;
+    if (!branch || !staff || !password) { $("aMsg").textContent = "Fill in all fields."; return; }
+    try {
+      const res = await post({ action: "login", branch: branch, staff: staff, password: password });
+      if (!res.ok) { $("aMsg").textContent = res.error; return; }
+      if (res.role !== "OWNER") { $("aMsg").textContent = "This login is not an owner account."; return; }
+      token = res.token;
+      me = res;
+      await load();
+      $("loginView").style.display = "none";
+      $("appView").style.display = "block";
+      $("who").textContent = "Head office  |  Owner: " + me.staff;
+      render();
+      startAutoSync();
+    } catch (e) {
+      $("aMsg").textContent = e.message || "Could not connect. Check internet.";
+    }
+  }
+
+  function logout() {
+    clearInterval(autoTimer);
+    location.reload();
+  }
+
+  // Loads all branches. Returns true if anything changed.
+  async function load() {
+    const r = await get({ action: "branches" });
+    if (!r.ok) throw new Error(r.error);
+    const sig = JSON.stringify(r.branches);
+    const changed = sig !== lastSig;
+    lastSig = sig;
+    branches = r.branches;
+    lastTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return changed;
+  }
+
+  // Don't redraw while typing in a form
+  function busy() {
+    const a = document.activeElement;
+    return !!(a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA"));
+  }
+
+  function startAutoSync() {
+    if (autoTimer) return;
+    autoTimer = setInterval(autoSync, 3000);
+  }
+
+  async function autoSync() {
+    if (!me || autoBusy) return;
+    autoBusy = true;
+    try {
+      if (await load()) pending = true;
+      if (pending && !busy()) { pending = false; render(); }
+      else { $("lastSync").textContent = lastTime; }
+    } catch (e) {
+    } finally {
+      autoBusy = false;
+    }
+  }
+
+  async function manualSync() {
+    try { await load(); pending = false; render(); }
+    catch (e) { alert("Sync failed: " + e.message); }
+  }
+
+  function list(arr) {
+    return arr.length ? arr.map(esc).join(", ") : `<span class="none">none</span>`;
+  }
+
+  function render() {
+    const totals = branches.reduce((t, b) => {
+      t.br++; t.brm += b.BRM.length; t.bcm += b.BCM.length; t.ro += b.RO.length; t.files += b.files;
+      return t;
+    }, { br: 0, brm: 0, bcm: 0, ro: 0, files: 0 });
+
+    $("stats").innerHTML = `
+      <div class="stat" style="background:#1e293b"><div class="n">${totals.br}</div><div class="l">Branches</div></div>
+      <div class="stat" style="background:#4c1d95"><div class="n">${totals.brm}</div><div class="l">BRM</div></div>
+      <div class="stat" style="background:#0f766e"><div class="n">${totals.bcm}</div><div class="l">BCM</div></div>
+      <div class="stat" style="background:#2563eb"><div class="n">${totals.ro}</div><div class="l">RO</div></div>`;
+
+    $("branches").innerHTML = branches.length ? branches.map(b => `
+      <div class="card">
+        <div class="top">
+          <span class="name">${esc(b.branch)}</span>
+          <span class="pill">${b.files} files</span>
+        </div>
+        <div style="margin-top:8px">
+          <div class="role"><b>BRM</b><span>${list(b.BRM)}</span></div>
+          <div class="role"><b>BCM</b><span>${list(b.BCM)}</span></div>
+          <div class="role"><b>RO</b><span>${list(b.RO)}</span></div>
+        </div>
+        <div class="totals">
+          Passed loans: <b>${money(b.passedAmt)}</b> &nbsp;|&nbsp; Disbursed: <b>${money(b.disbAmt)}</b>
+        </div>
+      </div>`).join("")
+      : `<div class="card">No branches yet. Create the first one below.</div>`;
+
+    $("branchNames").innerHTML = branches.map(b => `<option value="${esc(b.branch)}">`).join("");
+    $("lastSync").textContent = lastTime;
+  }
+
+  async function addBranch() {
+    const msg = $("bMsg");
+    try {
+      const res = await post({ action: "addbranch", branch: $("bBranch").value.trim(),
+                               staff: $("bBrm").value.trim(), password: $("bPass").value });
+      if (!res.ok) throw new Error(res.error);
+      msg.className = "msg ok";
+      msg.textContent = "Branch created. The BRM can now log in with the branch name.";
+      $("bBranch").value = ""; $("bBrm").value = ""; $("bPass").value = "";
+      await load();
+      render();
+    } catch (e) { msg.className = "msg"; msg.textContent = e.message; }
+  }
+
+  async function resetBrm() {
+    const msg = $("rMsg");
+    try {
+      const res = await post({ action: "ownerreset", branch: $("rBranch").value.trim(),
+                               staff: $("rBrm").value.trim(), password: $("rPass").value });
+      if (!res.ok) throw new Error(res.error);
+      msg.className = "msg ok";
+      msg.textContent = "Password reset for " + $("rBrm").value.trim() + ".";
+      $("rPass").value = "";
+    } catch (e) { msg.className = "msg"; msg.textContent = e.message; }
+  }
+</script>
+</body>
+</html>
