@@ -1,0 +1,17 @@
+{
+  "name": "H2H Head Office",
+  "short_name": "H2H Head Office",
+  "start_url": "./owner.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1eafd",
+  "theme_color": "#3d1080",
+  "icons": [
+    {
+      "src": "HO_H2H_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
