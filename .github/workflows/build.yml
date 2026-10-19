@@ -1,8 +1,7 @@
-name: Build APK
+name: Build H2H APKs
 
 on:
   workflow_dispatch:
-  push:
 
 permissions:
   contents: read
@@ -10,6 +9,14 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - { name: "H2H RO", file: "index.html", icon: "RO_H2H_512.png", id: "ro", pkg: "com.h2h.ro" }
+          - { name: "H2H BCM", file: "bcm.html", icon: "BCM_H2H_512.png", id: "bcm", pkg: "com.h2h.bcm" }
+          - { name: "H2H BRM", file: "brm.html", icon: "BRM_H2H_512.png", id: "brm", pkg: "com.h2h.brm" }
+          - { name: "H2H Head Office", file: "owner.html", icon: "HO_H2H_512.png", id: "owner", pkg: "com.h2h.owner" }
     steps:
       - uses: actions/checkout@v4
 
@@ -25,15 +32,31 @@ jobs:
       - name: Prepare web folder
         run: |
           mkdir -p www
-          cp index.html manifest.json icon-512.png www/
+          cp "${{ matrix.app.file }}" www/index.html
+          cp h2h.css www/
+          cp *_H2H_512.png www/ || true
+          cp manifest-*.json www/ || true
 
       - name: Create Android project
         run: |
           npm init -y
           npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
-          npx cap init "Loan Calc" com.appcreateone.loancalc --web-dir=www
+          npx cap init "${{ matrix.app.name }}" "${{ matrix.app.pkg }}" --web-dir=www
           npx cap add android
           npx cap sync android
+
+      - name: Set launcher icon
+        run: |
+          sudo apt-get update -y >/dev/null
+          sudo apt-get install -y imagemagick >/dev/null
+          RES=android/app/src/main/res
+          rm -rf $RES/mipmap-anydpi-v26
+          for pair in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            d=${pair%%:*}; s=${pair##*:}
+            mkdir -p $RES/mipmap-$d
+            convert "${{ matrix.app.icon }}" -resize ${s}x${s} $RES/mipmap-$d/ic_launcher.png
+            cp $RES/mipmap-$d/ic_launcher.png $RES/mipmap-$d/ic_launcher_round.png
+          done
 
       - name: Build APK
         working-directory: android
@@ -43,5 +66,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: loan-calc-apk
+          name: ${{ matrix.app.id }}-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
