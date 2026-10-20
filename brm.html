@@ -3,146 +3,299 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#4c1d95">
-<title>BRM Dashboard</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, Helvetica, sans-serif; background: #f5f3ff; color: #1e1b4b; }
-  header { background: linear-gradient(135deg, #4c1d95, #db2777); color: #fff; padding: 14px; text-align: center; }
-  header h1 { font-size: 18px; }
-  #clock, #who { font-size: 12px; margin-top: 4px; opacity: 0.95; }
-  .wrap { max-width: 600px; margin: 0 auto; padding: 12px; }
-  .card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-left: 6px solid #db2777; }
-  .card.Pending { border-left-color: #f59e0b; }
-  .card.Assigned { border-left-color: #7c3aed; }
-  .card.Verified { border-left-color: #2563eb; }
-  .card.Passed { border-left-color: #16a34a; }
-  .card.Rejected { border-left-color: #dc2626; }
-  .card h2 { font-size: 16px; color: #4c1d95; margin-bottom: 8px; }
-  label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin: 10px 0 4px; }
-  input, select { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; }
-  .btn { padding: 12px 8px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; color: #fff; background: linear-gradient(135deg, #4c1d95, #db2777); font-family: Arial, sans-serif; }
-  .btn.full { width: 100%; margin-top: 10px; }
-  .btn.sm { padding: 8px 12px; font-size: 12px; }
-  .btn.del { background: #dc2626; }
-  .btn.off { background: #e2e8f0; color: #334155; }
-  .btn.yes { background: #16a34a; }
-  .btn.no { background: #64748b; }
-  .msg { font-size: 13px; color: #b91c1c; margin-top: 10px; min-height: 16px; }
-  .msg.ok { color: #15803d; }
-  .syncBar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #475569; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
-  .tabs button { flex: 1; padding: 10px 4px; border: none; border-radius: 999px; background: #fff; color: #4c1d95; font-weight: bold; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); font-family: Arial, sans-serif; }
-  .tabs button.on { background: linear-gradient(135deg, #4c1d95, #db2777); color: #fff; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
-  .stat { border-radius: 12px; padding: 10px 4px; text-align: center; color: #fff; }
-  .stat .n { font-size: 20px; font-weight: bold; }
-  .stat .l { font-size: 11px; }
-  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-  .filters button { flex: 1; padding: 8px 4px; border: none; border-radius: 999px; background: #fff; color: #4c1d95; font-weight: bold; font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); font-family: Arial, sans-serif; }
-  .filters button.on { background: #7c3aed; color: #fff; }
-  .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .name { font-size: 16px; font-weight: bold; }
-  .pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; color: #fff; font-weight: bold; }
-  .pill.Pending { background: #f59e0b; }
-  .pill.Assigned { background: #7c3aed; }
-  .pill.Verified { background: #2563eb; }
-  .pill.Passed { background: #16a34a; }
-  .pill.Rejected { background: #dc2626; }
-  .small { font-size: 13px; color: #475569; margin-top: 6px; line-height: 1.6; }
-  .row2 { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
-  .disb { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e9d5ff; font-size: 14px; font-weight: bold; color: #4c1d95; }
-  .disb div { display: flex; gap: 6px; }
-  .disb .btn { padding: 8px 14px; }
-  .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .tbl th, .tbl td { border-bottom: 1px solid #e9d5ff; padding: 6px 4px; text-align: left; }
-  .tbl th { color: #4c1d95; }
-  .scroll { overflow-x: auto; }
-  .staff { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e9d5ff; font-size: 15px; }
-  .staff small { color: #64748b; }
-  .note { font-size: 12px; color: #64748b; margin-top: 6px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .calc { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; font-size: 13px; background: #f5f3ff; border-radius: 10px; padding: 10px; }
-  .btns2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-  .btn.yes { background: #16a34a; }
-  @media (max-width: 380px) { .grid, .calc { grid-template-columns: 1fr; } }
-  @media (max-width: 380px) { .stats { grid-template-columns: 1fr 1fr; } }
-</style>
-<link rel="stylesheet" href="h2h.css">
+<meta name="theme-color" content="#14532d">
 <link rel="manifest" href="manifest-brm.json">
 <link rel="icon" href="BRM_H2H_512.png">
 <link rel="apple-touch-icon" href="BRM_H2H_512.png">
-</head>
-<body data-theme="brm">
+<title>H2H BRM</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { overflow-x: hidden; }
+  body { font-family: "Segoe UI", Roboto, Arial, sans-serif; background: #eef6f0; color: #0f172a; padding-bottom: 96px; font-size: 15px; }
+  button, input, select { font-family: inherit; }
 
-<header>
-  <img class="brand" src="BRM_H2H_512.png" alt="H2H">
-  <h1>H2H &middot; Branch Head</h1>
-  <div id="clock"></div>
-  <div id="who"></div>
-</header>
+  /* Header */
+  .bh { background: linear-gradient(100deg, #052e16 0%, #14532d 45%, #15803d 100%); color: #fff; padding: 12px 14px 14px; position: relative; overflow: visible; }
+  .bh::after { content: ""; position: absolute; right: -60px; top: -40px; width: 220px; height: 160px; border-radius: 50%; background: radial-gradient(ellipse, rgba(250,204,21,0.45), transparent 70%); pointer-events: none; }
+  .bh-row { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
+  .logo { width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 3px solid #fff; overflow: hidden; flex: none; box-shadow: 0 6px 14px rgba(0,0,0,0.3); }
+  .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ttl { flex: 1; min-width: 0; }
+  .ttl h1 { font-size: 16px; font-weight: 800; letter-spacing: 1.2px; white-space: nowrap; }
+  .happy { display: inline-block; margin-top: 4px; background: #facc15; color: #1e293b; font-size: 12px; font-weight: 800; padding: 2px 10px; border-radius: 999px; }
+  .hsub { font-size: 13px; font-weight: 600; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .hsub span { display: inline-flex; align-items: center; gap: 5px; }
+  .syncBox { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.3); border-radius: 14px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; flex: none; }
+  .syncBox small { display: block; font-size: 11px; opacity: 0.95; }
+  .syncBox b { display: block; font-size: 14px; }
+  .gd { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; display: inline-block; margin-left: 4px; }
+  .bell { position: relative; width: 46px; height: 46px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none; }
+  .bn { position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px; border-radius: 50%; background: #ef4444; color: #fff; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #15803d; }
+  .bn.zero { display: none; }
+  .menuBtn { background: none; border: none; padding: 2px; cursor: pointer; flex: none; }
+
+  /* Layout */
+  .wrap { padding: 12px 12px 0; }
+  .card { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 12px; box-shadow: 0 8px 18px rgba(5,46,22,0.07); }
+  .h2 { font-size: 16px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .h2 small { font-size: 12px; color: #475569; font-weight: 600; }
+  .note { font-size: 13px; color: #475569; line-height: 1.5; }
+  .msg { font-size: 14px; font-weight: 700; color: #b91c1c; min-height: 18px; margin-top: 6px; }
+  .msg.ok { color: #15803d; }
+
+  /* Top tiles */
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  .tile { background: #fff; border-radius: 16px; padding: 12px 6px; text-align: center; border: 1.5px solid #e2e8f0; box-shadow: 0 6px 14px rgba(5,46,22,0.06); cursor: pointer; font-weight: 800; font-size: 12.5px; color: #0f172a; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .tile .ic { width: 40px; height: 40px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; }
+  .tile.on { background: linear-gradient(135deg, #14532d, #15803d); color: #fff; border-color: transparent; }
+  .tile.on .ic { background: rgba(255,255,255,0.22); }
+
+  /* KPI tiles */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 12px; }
+  .kt { border-radius: 16px; padding: 12px 8px; color: #0f172a; border: 1.5px solid; min-height: 118px; display: flex; flex-direction: column; justify-content: space-between; }
+  .kt .n { font-size: 26px; font-weight: 800; line-height: 1; }
+  .kt .l { font-size: 12px; font-weight: 800; margin-top: 4px; }
+  .kt .t { font-size: 11px; font-weight: 600; color: #334155; margin-top: 2px; }
+  .kt-tot { background: linear-gradient(160deg, #14532d, #16a34a); color: #fff; border-color: transparent; }
+  .kt-tot .t { color: #dcfce7; }
+  .kt-pen { background: #fff7e6; border-color: #fcd34d; } .kt-pen .n, .kt-pen .l { color: #b45309; }
+  .kt-ver { background: #eff6ff; border-color: #93c5fd; } .kt-ver .n, .kt-ver .l { color: #1d4ed8; }
+  .kt-dis { background: #ecfdf3; border-color: #86efac; } .kt-dis .n, .kt-dis .l { color: #15803d; }
+
+  /* Amount + target */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .amt-card { background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 8px 18px rgba(5,46,22,0.07); }
+  .amt-card .lab { font-size: 14px; font-weight: 800; color: #1e3a8a; display: flex; align-items: center; gap: 8px; }
+  .amt-card .big { font-size: 26px; font-weight: 800; color: #14532d; margin-top: 6px; }
+  .amt-card .sub { font-size: 13px; color: #b45309; font-weight: 700; margin-top: 2px; }
+  .pct { font-size: 28px; font-weight: 800; color: #15803d; margin-top: 6px; }
+  .prog { height: 12px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin: 8px 0 4px; }
+  .prog div { height: 100%; background: linear-gradient(90deg, #22c55e, #15803d); border-radius: 999px; }
+  .tgt { font-size: 13px; color: #334155; font-weight: 700; }
+
+  /* Activity */
+  .act3 { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; margin-top: 8px; }
+  .act3 div { padding: 4px 0; }
+  .act3 div + div { border-left: 1px solid #e2e8f0; }
+  .act3 b { display: block; font-size: 24px; }
+  .act3 span { font-size: 13px; font-weight: 700; }
+
+  /* Charts */
+  .charts { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+  .donutRow { display: flex; align-items: center; gap: 12px; }
+  .donut { width: 130px; height: 130px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; }
+  .donut span { width: 80px; height: 80px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: #475569; font-weight: 600; }
+  .donut span b { font-size: 22px; color: #0f172a; }
+  .legend { flex: 1; font-size: 14px; }
+  .legend div { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 6px; align-items: center; padding: 5px 0; }
+  .legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .legend b { font-weight: 800; }
+  .legend small { color: #475569; font-weight: 700; }
+  .ro { display: grid; grid-template-columns: 26px 1fr 96px; gap: 8px; align-items: center; padding: 6px 0; font-size: 14px; }
+  .rank { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #475569; }
+  .rank.r1 { border-color: #f59e0b; background: #fff7e6; color: #b45309; }
+  .rank.r2 { border-color: #94a3b8; }
+  .rank.r3 { border-color: #d97706; color: #92400e; }
+  .bar { height: 14px; border-radius: 999px; background: #e8efe9; overflow: hidden; }
+  .bar div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #22c55e, #15803d); }
+  .ro .amt { text-align: right; font-weight: 800; }
+
+  /* Filters and search */
+  .fpills { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 10px; }
+  .fp { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e2e8f0; color: #0f172a; border-radius: 999px; padding: 9px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+  .fp.on { background: linear-gradient(135deg, #14532d, #15803d); color: #fff; border-color: transparent; }
+  .srch { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .search { flex: 1; display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 0 12px; height: 46px; min-width: 0; }
+  .search input { border: none; outline: none; flex: 1; font-size: 15px; background: transparent; min-width: 0; }
+  .fbtn { height: 46px; width: 46px; border-radius: 14px; border: none; background: linear-gradient(135deg, #15803d, #14532d); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none; }
+
+  /* File cards */
+  .fcard { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 12px; box-shadow: 0 8px 18px rgba(5,46,22,0.07); border-left: 6px solid #15803d; }
+  .fcard.Pending { border-left-color: #f59e0b; }
+  .fcard.Assigned { border-left-color: #7c3aed; }
+  .fcard.Verified { border-left-color: #2563eb; }
+  .fcard.Passed { border-left-color: #16a34a; }
+  .fcard.Rejected { border-left-color: #dc2626; }
+  .fhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .fhead b { font-size: 17px; display: block; }
+  .fhead small { color: #475569; font-size: 13px; }
+  .fline { font-size: 14px; color: #334155; line-height: 1.6; margin-top: 6px; }
+  .pill { font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 999px; white-space: nowrap; }
+  .p-Pending { background: #fef3c7; color: #92400e; }
+  .p-Assigned { background: #ede9fe; color: #5b21b6; }
+  .p-Verified { background: #dbeafe; color: #1e40af; }
+  .p-Passed { background: #dcfce7; color: #166534; }
+  .p-Rejected { background: #fee2e2; color: #991b1b; }
+  .arow { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
+  .arow select, .dform select { height: 46px; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0 10px; font-size: 15px; background: #fff; min-width: 0; }
+  .gbtn { height: 46px; padding: 0 16px; border: none; border-radius: 12px; background: linear-gradient(135deg, #15803d, #14532d); color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; }
+  .drow { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-weight: 800; font-size: 14px; color: #0f172a; }
+  .drow div { display: flex; gap: 6px; }
+  .ybtn, .nbtn { border: 1.5px solid #cbd5e1; background: #fff; color: #334155; border-radius: 10px; padding: 7px 14px; font-weight: 800; cursor: pointer; }
+  .ybtn.on { background: #15803d; border-color: #15803d; color: #fff; }
+  .nbtn.on { background: #64748b; border-color: #64748b; color: #fff; }
+  .dform { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 8px; }
+  .dtxt { font-size: 14px; font-weight: 800; color: #15803d; margin-top: 6px; }
+
+  /* Tables and staff */
+  .tw { overflow-x: auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 18px rgba(5,46,22,0.07); margin-bottom: 12px; }
+  table.t { width: 100%; border-collapse: collapse; min-width: 540px; font-size: 13px; }
+  table.t th { background: #14532d; color: #fff; text-align: left; padding: 9px 6px; font-size: 12px; }
+  table.t td { padding: 8px 6px; border-bottom: 1px solid #e8efe9; }
+  .srow { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; }
+  .srow small { color: #64748b; margin-left: 4px; }
+  .rm { border: none; background: #fee2e2; color: #b91c1c; border-radius: 10px; padding: 7px 12px; font-weight: 800; cursor: pointer; }
+  .fld { display: block; font-size: 13px; font-weight: 800; color: #334155; margin: 8px 0 5px; }
+  .fld-in { width: 100%; height: 46px; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0 12px; font-size: 16px; background: #fff; }
+  .btnFull { width: 100%; height: 48px; border: none; border-radius: 14px; background: linear-gradient(135deg, #15803d, #14532d); color: #fff; font-weight: 800; font-size: 16px; margin-top: 10px; cursor: pointer; }
+  .pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* Login */
+  .login { max-width: 420px; margin: 40px auto; padding: 0 14px; }
+  .login .card { padding: 18px; }
+
+  /* Bottom bar */
+  .bnav { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; box-shadow: 0 -8px 22px rgba(5,46,22,0.12); display: flex; justify-content: space-around; align-items: flex-end; padding: 8px 6px 10px; z-index: 40; }
+  .bnav button { background: none; border: none; font-size: 12px; font-weight: 700; color: #334155; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 8px; min-width: 60px; cursor: pointer; }
+  .bnav button.on { color: #fff; background: linear-gradient(135deg, #14532d, #15803d); border-radius: 14px; }
+
+  @media (max-width: 380px) {
+    .kt .n { font-size: 22px; }
+    .kt .l, .kt .t { font-size: 10px; }
+    .tile { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
 
 <!-- LOGIN -->
-<div class="wrap" id="loginView">
+<div class="login" id="login">
   <div class="card">
-    <h2>BRM login</h2>
-    <label>Branch name</label>
-    <input id="aBranch" type="text">
-    <label>Your name</label>
-    <input id="aName" type="text">
-    <label>Password</label>
-    <input id="aPass" type="password">
-    <button class="btn full" onclick="login()">Login</button>
-    <div id="aMsg" class="msg"></div>
+    <div style="text-align:center;margin-bottom:12px"><img src="BRM_H2H_512.png" alt="H2H BRM" style="width:90px;height:90px;border-radius:18px"></div>
+    <h2 style="font-size:18px;margin-bottom:10px;text-align:center">BRM login</h2>
+    <label class="fld">Branch name</label><input class="fld-in" id="aBranch" type="text">
+    <label class="fld">Your name</label><input class="fld-in" id="aName" type="text">
+    <label class="fld">Password</label><input class="fld-in" id="aPass" type="password">
+    <button class="btnFull" onclick="login()">Login</button>
+    <div class="msg" id="aMsg"></div>
   </div>
 </div>
 
 <!-- APP -->
-<div class="wrap" id="appView" style="display:none">
-  <div class="syncBar">
-    <span>Auto sync every 3 sec &nbsp;|&nbsp; last: <b id="lastSync">-</b></span>
-    <button class="btn sm" onclick="manualSync()">Sync now</button>
-  </div>
-  <div class="tabs">
-    <button id="tFiles" class="on" onclick="setView('files')">Files</button>
-    <button id="tSum" onclick="setView('sum')">Summary</button>
-    <button id="tStaff" onclick="setView('staff')">Staff</button>
-    <button id="tPerf" onclick="setView('perf')">RO Performance</button>
-    <button onclick="logout()">Logout</button>
-  </div>
-  <div id="filesView"></div>
-  <div id="sumView" style="display:none"></div>
-  <div id="staffView" style="display:none"></div>
-  <div id="perfView" style="display:none"></div>
+<div id="app" style="display:none">
+  <header class="bh">
+    <div class="bh-row">
+      <button class="menuBtn" onclick="setView('more')"><span data-ico="menu" data-size="28" data-color="#fff"></span></button>
+      <div class="logo"><img src="BRM_H2H_512.png" alt="H2H BRM"></div>
+      <div class="ttl">
+        <h1>H2H &middot; BRANCH HEAD</h1>
+        <span class="happy">Happy to Help</span>
+        <div class="hsub" id="hsub"></div>
+      </div>
+      <div class="syncBox">
+        <span data-ico="refresh" data-size="22" data-color="#fff"></span>
+        <div><small><span class="gd"></span> Auto sync every 3 sec</small><b id="lastSync">-</b></div>
+      </div>
+      <button class="bell" onclick="setView('files')"><span data-ico="bell" data-size="24" data-color="#fff"></span><span class="bn zero" id="bn">0</span></button>
+    </div>
+  </header>
+
+  <main class="wrap" id="view"></main>
+
+  <nav class="bnav">
+    <button id="nDash" class="on" onclick="setView('dash')"><span data-ico="home" data-size="24"></span><span>Dashboard</span></button>
+    <button id="nFiles" onclick="setView('files')"><span data-ico="file" data-size="24"></span><span>Files</span></button>
+    <button id="nStaff" onclick="setView('staff')"><span data-ico="users" data-size="24"></span><span>Staff</span></button>
+    <button id="nRep" onclick="setView('summary')"><span data-ico="bar" data-size="24"></span><span>Reports</span></button>
+    <button id="nMore" onclick="setView('more')"><span data-ico="grid" data-size="24"></span><span>More</span></button>
+  </nav>
 </div>
 
 <script>
   // Only the web app URL goes here. No keys are stored in this page.
   const SYNC_URL = "https://script.google.com/macros/s/AKfycbxRCx6N62C3ke8ZVZDi_nNojd4F_DtUUEAh4LWu66LhCy7m-JuXeGKaaaKqjRuohEZi/exec";
+  const DIS_MIN = 10000, DIS_MAX = 1000000, DIS_STEP = 10000;
+  const PRODUCTS = [["IGL1", "IGL 1st cycle"], ["IGL2", "IGL 2nd cycle & above"], ["IL", "IL"], ["MSME", "MSME"], ["GOLD", "Gold loan"]];
 
-  let token = "", me = null, recs = [], bcms = [], staffList = [];
-  let filter = "All", view = "files", lastSig = "", pending = false, autoTimer = null, autoBusy = false, lastTime = "-";
+  // ---------- icons ----------
+  const IC = {
+    menu: '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>',
+    bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+    refresh: '<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10"/><path d="M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/>',
+    file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>',
+    hourglass: '<path d="M6 2h12"/><path d="M6 22h12"/><path d="M7 2v4a5 5 0 0 0 2 4 5 5 0 0 0-2 4v4"/><path d="M17 2v4a5 5 0 0 1-2 4 5 5 0 0 1 2 4v4"/>',
+    check: '<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>',
+    users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
+    bar: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+    grid: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    trend: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.7" y2="16.7"/>',
+    filter: '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+    pin: '<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/>',
+    logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    chev: '<polyline points="9 18 15 12 9 6"/>',
+    coins: '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+    x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    xcirc: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+    dots: '<circle cx="12" cy="5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="19" r="1.8" fill="currentColor"/>'
+  };
+  function ico(name, size = 20, color = "currentColor") {
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none">${IC[name] || ""}</svg>`;
+  }
+  function applyIcons() {
+    document.querySelectorAll("[data-ico]").forEach(el => {
+      el.innerHTML = ico(el.getAttribute("data-ico"), Number(el.getAttribute("data-size")) || 20, el.getAttribute("data-color") || "currentColor");
+    });
+  }
+  applyIcons();
+
+  // ---------- helpers ----------
+  let token = "", me = null, recs = [], bcms = [], staffList = [], perf = null;
+  let view = "dash", filter = "All", q = "", lastSig = "", pending = false, autoTimer = null, autoBusy = false, lastTime = "-";
   const $ = id => document.getElementById(id);
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function rs(n) {
+    if (n === "" || n === null || n === undefined) return "-";
+    const v = Number(n);
+    return isFinite(v) ? "\u20B9" + Math.round(v).toLocaleString("en-IN") : "-";
   }
   function fmt(s) {
     if (!s) return "-";
     const d = new Date(s);
     return isNaN(d) ? String(s) : d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
   }
-  function money(n) {
-    return (n === "" || n === null || n === undefined || !isFinite(n)) ? "-" : "\u20B9" + Number(n).toLocaleString("en-IN");
-  }
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function todayKey() { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function todayLoc() { return new Date().toLocaleDateString("en-IN"); }
+  function monthKey() { return todayKey().slice(0, 7); }
   function same(a, b) { return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); }
-  function clock() {
-    $("clock").textContent = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  function sumOf(list, f) { return list.reduce((s, r) => s + (Number(f(r)) || 0), 0); }
+  function det(r) { return (r.Data && r.Data.data) || {}; }
+  function cname(r) { return det(r).cname || r.Client || "-"; }
+  function mobile(r) { return det(r).mobile || r.Mobile || ""; }
+  function centerOf(r) { return det(r).center || r.Center || ""; }
+  function prodOf(r) { return String(r.Product || det(r).product || r.Type || ""); }
+  function statusOf(r) {
+    if (r.Result === "Passed") return "Passed";
+    if (r.Result === "Rejected") return "Rejected";
+    return r.Status || "Pending";
   }
-  clock();
-  setInterval(clock, 30000);
+  function disOptions(selected) {
+    let o = '<option value="">Select amount</option>';
+    for (let v = DIS_MIN; v <= DIS_MAX; v += DIS_STEP) {
+      o += `<option value="${v}" ${Number(selected) === v ? "selected" : ""}>${rs(v)}</option>`;
+    }
+    return o;
+  }
 
-  // Server calls
+  // ---------- server ----------
   async function post(p) {
     if (SYNC_URL.startsWith("PASTE")) throw new Error("Set SYNC_URL in brm.html first.");
     const res = await fetch(SYNC_URL, {
@@ -153,12 +306,11 @@
     return res.json();
   }
   async function get(params) {
-    const q = Object.entries(Object.assign({ token: token }, params))
-      .map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
-    return (await fetch(SYNC_URL + "?" + q)).json();
+    const qs = Object.entries(Object.assign({ token: token }, params)).map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+    return (await fetch(SYNC_URL + "?" + qs)).json();
   }
 
-  // Login
+  // ---------- login ----------
   async function login() {
     const branch = $("aBranch").value.trim(), staff = $("aName").value.trim(), password = $("aPass").value;
     if (!branch || !staff || !password) { $("aMsg").textContent = "Fill in all fields."; return; }
@@ -168,23 +320,30 @@
       if (res.role !== "BRM") { $("aMsg").textContent = "This login is not a BRM account."; return; }
       token = res.token;
       me = res;
+      localStorage.setItem("brm_session", JSON.stringify({ token: token, branch: me.branch, staff: me.staff, role: me.role }));
       await loadAll();
-      $("loginView").style.display = "none";
-      $("appView").style.display = "block";
-      $("who").textContent = "Branch: " + me.branch + "  |  BRM: " + me.staff;
-      render();
-      startAutoSync();
+      startApp();
     } catch (e) {
       $("aMsg").textContent = e.message || "Could not connect. Check internet.";
     }
   }
 
+  function startApp() {
+    $("login").style.display = "none";
+    $("app").style.display = "block";
+    $("hsub").innerHTML = `<span>${ico("pin", 14, "#fff")} Branch: ${esc(me.branch)}</span><span>${ico("user", 14, "#fff")} BRM: ${esc(me.staff)}</span>`;
+    applyIcons();
+    render();
+    if (!autoTimer) autoTimer = setInterval(autoSync, 3000);
+  }
+
   function logout() {
+    localStorage.removeItem("brm_session");
     clearInterval(autoTimer);
     location.reload();
   }
 
-  // Loads files, BCM list and staff list. Returns true if the files changed.
+  // ---------- data ----------
   async function loadAll() {
     const r = await get({ action: "records" });
     if (!r.ok) throw new Error(r.error);
@@ -200,32 +359,26 @@
     return changed;
   }
 
-  // Don't redraw while the user is choosing a BCM or typing
+  async function loadPerf() {
+    const r = await get({ action: "perfget", period: monthKey() });
+    if (!r.ok) throw new Error(r.error);
+    perf = r;
+  }
+
+  // Don't redraw while a form is open or the user is typing
   function busy() {
     const a = document.activeElement;
     if (a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA")) return true;
-    return false;
-  }
-
-  function startAutoSync() {
-    if (autoTimer) return;
-    autoTimer = setInterval(autoSync, 3000);
+    return !!document.querySelector('.dform[style*="block"]');
   }
 
   async function autoSync() {
     if (!me || autoBusy) return;
     autoBusy = true;
     try {
-      const r = await get({ action: "records" });
-      if (r.ok) {
-        const sig = JSON.stringify(r.records);
-        if (sig !== lastSig) { lastSig = sig; recs = r.records; pending = true; }
-      }
-      lastTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-      // Staff list is only redrawn on the Staff tab when the user isn't typing there
-      if (pending && !busy() && view !== "staff" && view !== "perf") { pending = false; render(); }
-      else if (view === "staff") { $("lastSync").textContent = lastTime; }
-      else { $("lastSync").textContent = lastTime; }
+      if (await loadAll()) pending = true;
+      $("lastSync").textContent = lastTime;
+      if (pending && !busy() && view !== "perf" && view !== "staff") { pending = false; render(); }
     } catch (e) {
     } finally {
       autoBusy = false;
@@ -233,99 +386,237 @@
   }
 
   async function manualSync() {
-    try {
-      await loadAll();
-      pending = false;
-      render();
-    } catch (e) { alert("Sync failed: " + e.message); }
+    try { await loadAll(); pending = false; render(); }
+    catch (e) { alert("Sync failed: " + e.message); }
   }
 
+  // ---------- navigation ----------
   function setView(v) {
     view = v;
-    if (v === "perf") perfData = null; // reload performance when the tab opens
-    ["files", "sum", "staff", "perf"].forEach(x => {
-      $("t" + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle("on", x === v);
-      $(x + "View").style.display = x === v ? "block" : "none";
-    });
-    render();
+    const tabs = { dash: "nDash", files: "nFiles", staff: "nStaff", summary: "nRep", more: "nMore" };
+    Object.values(tabs).forEach(id => $(id).classList.remove("on"));
+    if (tabs[v]) $(tabs[v]).classList.add("on");
+    if (v === "perf") loadPerf().then(render).catch(e => alert(e.message));
+    else render();
+    window.scrollTo(0, 0);
   }
 
   function render() {
+    if (!me) return;
     $("lastSync").textContent = lastTime;
-    if (view === "files") renderFiles();
-    else if (view === "sum") renderSummary();
+    const toAssign = recs.filter(r => statusOf(r) === "Pending" && !r["Assigned BCM"]).length;
+    $("bn").textContent = toAssign;
+    $("bn").classList.toggle("zero", toAssign === 0);
+    if (view === "dash") renderDash();
+    else if (view === "files") renderFiles();
+    else if (view === "summary") renderSummary();
+    else if (view === "staff") renderStaff();
     else if (view === "perf") renderPerf();
-    else renderStaff();
+    else renderMore();
+  }
+
+  // Top tiles shown on the dashboard
+  function tilesHtml(active) {
+    const tiles = [["files", "Files", "file"], ["summary", "Summary", "bar"], ["staff", "Staff", "users"], ["perf", "RO Performance", "trend"]];
+    return `<div class="tiles">${tiles.map(([v, label, icon]) => `
+      <div class="tile ${active === v ? "on" : ""}" onclick="setView('${v}')">
+        <div class="ic">${ico(icon, 20, active === v ? "#fff" : "#15803d")}</div>${label}
+      </div>`).join("")}</div>`;
+  }
+
+  // ---------- DASHBOARD ----------
+  function renderDash() {
+    const t = todayKey(), tl = todayLoc();
+    const todayRecs = recs.filter(r => String(r.Date || "") === t);
+    const dis = recs.filter(r => r.Disbursed === "Yes");
+    const disAmt = sumOf(dis, r => r["Disbursed Amount"]);
+    const disToday = dis.filter(r => String(r["Disbursed At"] || "").includes(tl));
+    const disAmtToday = sumOf(disToday, r => r["Disbursed Amount"]);
+    const pendingL = recs.filter(r => statusOf(r) === "Pending");
+    const verifiedL = recs.filter(r => statusOf(r) === "Verified");
+    const unassigned = pendingL.filter(r => !r["Assigned BCM"]);
+
+    // Branch target (from RO performance, this month)
+    const rows = (perf && perf.rows) || [];
+    const target = sumOf(rows, r => r.target);
+    const achieved = sumOf(rows, r => r.achieved);
+    const pct = target ? Math.round(achieved / target * 100) : 0;
+
+    // Product donut (files by product)
+    const buckets = { IGL: 0, GRT: 0, IL: 0, MSME: 0 };
+    recs.forEach(r => { const p = prodOf(r).toUpperCase(); if (buckets[p] !== undefined) buckets[p]++; else buckets.GRT++; });
+    const bTot = Object.values(buckets).reduce((a, b) => a + b, 0);
+    const colors = { IGL: "#2563eb", GRT: "#f59e0b", IL: "#16a34a", MSME: "#7c3aed" };
+    let acc = 0;
+    const stops = Object.keys(buckets).map(k => {
+      const pc = bTot ? buckets[k] / bTot * 100 : 0;
+      const from = acc; acc += pc;
+      return `${colors[k]} ${from}% ${acc}%`;
+    });
+    const donutBg = bTot ? `conic-gradient(${stops.join(", ")})` : "conic-gradient(#e5e7eb 0 100%)";
+    const legend = Object.keys(buckets).map(k => `
+      <div><i style="background:${colors[k]}"></i><span>${k}</span><b>${buckets[k]}</b><small>(${bTot ? Math.round(buckets[k] / bTot * 100) : 0}%)</small></div>`).join("");
+
+    // RO performance: disbursed amount per RO
+    const roNames = [...new Set(recs.map(r => r.Staff).filter(Boolean))];
+    const roRows = roNames.map(n => ({ name: n, amt: sumOf(dis.filter(r => same(r.Staff, n)), r => r["Disbursed Amount"]) }))
+      .sort((a, b) => b.amt - a.amt).slice(0, 6);
+    const rmax = Math.max(1, ...roRows.map(x => x.amt));
+    const roHtml = roRows.map((x, i) => `
+      <div class="ro">
+        <span class="rank ${i === 0 ? "r1" : i === 1 ? "r2" : i === 2 ? "r3" : ""}">${i + 1}</span>
+        <div><div style="font-weight:700;margin-bottom:4px">${esc(x.name)}</div><div class="bar"><div style="width:${Math.round(x.amt / rmax * 100)}%"></div></div></div>
+        <span class="amt">${rs(x.amt)}</span>
+      </div>`).join("") || `<p class="note">No disbursements yet.</p>`;
+
+    // Search and short file list
+    const shortList = recs.slice(0, 4).map(fileCard).join("") || `<div class="card">No files yet.</div>`;
+
+    $("view").innerHTML = `
+      ${tilesHtml("")}
+
+      <div class="kpis">
+        <div class="kt kt-tot"><div>${ico("file", 22, "#fff")}</div><div class="n">${recs.length}</div><div class="l">Total Files</div><div class="t">Today: ${todayRecs.length}</div></div>
+        <div class="kt kt-pen"><div>${ico("hourglass", 22, "#b45309")}</div><div class="n">${pendingL.length}</div><div class="l">Pending</div><div class="t">Today: ${pendingL.filter(r => String(r.Date || "") === t).length}</div></div>
+        <div class="kt kt-ver"><div>${ico("check", 22, "#1d4ed8")}</div><div class="n">${verifiedL.length}</div><div class="l">Verified</div><div class="t">Today: ${verifiedL.filter(r => String(r.Date || "") === t).length}</div></div>
+        <div class="kt kt-dis"><div>${ico("coins", 22, "#15803d")}</div><div class="n">${dis.length}</div><div class="l">Disbursed</div><div class="t">Today: ${disToday.length}</div></div>
+      </div>
+
+      <div class="two">
+        <div class="amt-card">
+          <div class="lab">${ico("coins", 20, "#15803d")} Total Disbursed Loan Amount</div>
+          <div class="big">${rs(disAmt)}</div>
+          <div class="sub">Today: ${rs(disAmtToday)}</div>
+        </div>
+        <div class="amt-card">
+          <div class="lab">${ico("target", 20, "#ea580c")} Branch Target Achievement</div>
+          <div class="pct">${pct}%</div>
+          <div class="prog"><div style="width:${Math.min(100, pct)}%"></div></div>
+          <div class="tgt">Target: ${rs(target)} &nbsp;|&nbsp; Achieved: ${rs(achieved)}</div>
+        </div>
+      </div>
+
+      <div class="two">
+        <div class="amt-card">
+          <div class="lab">${ico("users", 20, "#ea580c")} Pending BCM Assignment</div>
+          <div class="big" style="color:#ea580c">${unassigned.length} <span style="font-size:16px;color:#0f172a">Files</span></div>
+        </div>
+        <div class="amt-card">
+          <div class="lab">${ico("calendar", 20, "#15803d")} Today's Activity</div>
+          <div class="act3">
+            <div><b style="color:#1d4ed8">${todayRecs.length}</b><span>New Files</span></div>
+            <div><b style="color:#15803d">${verifiedL.filter(r => String(r.Date || "") === t).length}</b><span>Verified</span></div>
+            <div><b style="color:#ea580c">${disToday.length}</b><span>Disbursed</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts">
+        <div class="card">
+          <div class="h2">Product Wise Files</div>
+          <div class="donutRow">
+            <div class="donut" style="background:${donutBg}"><span><b>${bTot}</b>Total</span></div>
+            <div class="legend">${legend}</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="h2">RO Performance <small>(Disbursed Amount)</small></div>
+          ${roHtml}
+        </div>
+      </div>
+
+      <div class="srch">
+        <div class="search">${ico("search", 18, "#64748b")}<input id="dq" placeholder="Search by name, mobile, RO, center, product..." value="${esc(q)}" onfocus="setView('files')"></div>
+      </div>
+      <div class="h2" style="margin:6px 2px">Recent files <button class="gbtn" style="height:36px;padding:0 12px;font-size:13px" onclick="setView('files')">View all</button></div>
+      ${shortList}`;
+    applyIcons();
   }
 
   // ---------- FILES ----------
-  function renderFiles() {
-    const c = { total: recs.length, Pending: 0, Assigned: 0, Verified: 0, Completed: 0, disb: 0 };
-    recs.forEach(r => {
-      const s = r.Status || "Pending";
-      if (c[s] !== undefined) c[s]++;
-      if (r.Result === "Passed" && r.Disbursed === "Yes") c.disb++;
+  function filteredFiles() {
+    const term = q.trim().toLowerCase();
+    return recs.filter(r => {
+      const st = statusOf(r);
+      if (filter === "Pending" && st !== "Pending") return false;
+      if (filter === "Assigned" && !(st === "Pending" && r["Assigned BCM"]) && st !== "Assigned") return false;
+      if (filter === "Verified" && st !== "Verified") return false;
+      if (filter === "Completed" && st !== "Passed" && st !== "Rejected") return false;
+      if (term) {
+        const hay = [cname(r), mobile(r), r.Staff, centerOf(r), prodOf(r)].join(" ").toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      return true;
     });
-    const opts = ["All", "Pending", "Assigned", "Verified", "Completed"];
-    $("filesView").innerHTML = `
-      <div class="stats">
-        <div class="stat" style="background:#4c1d95"><div class="n">${c.total}</div><div class="l">All files</div></div>
-        <div class="stat" style="background:#f59e0b"><div class="n">${c.Pending}</div><div class="l">Pending</div></div>
-        <div class="stat" style="background:#2563eb"><div class="n">${c.Verified}</div><div class="l">Verified</div></div>
-        <div class="stat" style="background:#16a34a"><div class="n">${c.disb}</div><div class="l">Disbursed</div></div>
-      </div>
-      <div class="filters">${opts.map(f => `<button class="${f === filter ? "on" : ""}" onclick="setFilter('${f}')">${f}</button>`).join("")}</div>
-      ${recs.filter(r => filter === "All" || (r.Status || "Pending") === filter).map(fileCard).join("") || `<div class="card">No files.</div>`}`;
   }
 
-  function setFilter(f) { filter = f; render(); }
+  function renderFiles() {
+    const counts = {
+      All: recs.length,
+      Pending: recs.filter(r => statusOf(r) === "Pending").length,
+      Assigned: recs.filter(r => statusOf(r) === "Assigned" || (statusOf(r) === "Pending" && r["Assigned BCM"])).length,
+      Verified: recs.filter(r => statusOf(r) === "Verified").length,
+      Completed: recs.filter(r => statusOf(r) === "Passed" || statusOf(r) === "Rejected").length
+    };
+    const fp = name => `<button class="fp ${filter === name ? "on" : ""}" onclick="setFilter('${name}')">${name} (${counts[name]})</button>`;
+    $("view").innerHTML = `
+      <div class="h2">All files <small>(assign BCM and mark disbursed)</small></div>
+      <div class="srch"><div class="search">${ico("search", 18, "#64748b")}<input placeholder="Search by name, mobile, RO, center, product..." value="${esc(q)}" oninput="q=this.value;renderFilesList()"></div></div>
+      <div class="fpills">${["All", "Pending", "Assigned", "Verified", "Completed"].map(fp).join("")}</div>
+      <div id="flist"></div>`;
+    renderFilesList();
+  }
+
+  function renderFilesList() {
+    const box = $("flist");
+    if (!box) return;
+    const list = filteredFiles();
+    box.innerHTML = list.map(fileCard).join("") || `<div class="card">No files match.</div>`;
+    applyIcons();
+  }
+
+  function setFilter(f) { filter = f; renderFiles(); }
 
   function fileCard(r) {
-    const d = (r.Data && r.Data.data) || {};
-    const id = String(r.ID);
-    const st = r.Status || "Pending";
-    const shown = st === "Completed" ? (r.Result || "Completed") : st;
-
-    let result = "";
-    if (st === "Completed") {
-      result = r.Result === "Passed"
-        ? `<br><b>Passed: ${money(r["Passed Amount"])}</b>`
-        : `<br><b>Rejected: ${esc(r["Reject Reason"] || "-")}</b>`;
+    const st = statusOf(r), id = String(r.ID), assigned = r["Assigned BCM"] || "";
+    const finished = st === "Passed" || st === "Rejected";
+    let action = "";
+    if (!finished) {
+      action = `
+        <div class="arow">
+          <select id="as-${id}"><option value="">Choose BCM</option>
+            ${bcms.map(b => `<option ${same(b.staff, assigned) ? "selected" : ""}>${esc(b.staff)}</option>`).join("")}</select>
+          <button class="gbtn" onclick="assign('${id}')">Assign</button>
+        </div>`;
+    } else if (st === "Passed") {
+      action = `
+        <div class="drow">
+          <span>Loan disbursed?</span>
+          <div>
+            <button class="ybtn ${r.Disbursed === "Yes" ? "on" : ""}" onclick="showDis('${id}')">Yes</button>
+            <button class="nbtn ${r.Disbursed === "No" ? "on" : ""}" onclick="disburse('${id}','No')">No</button>
+          </div>
+        </div>
+        <div class="dform" id="df-${id}" style="display:none">
+          <select id="da-${id}">${disOptions(r["Disbursed Amount"])}</select>
+          <button class="gbtn" onclick="saveDis('${id}')">Save amount</button>
+        </div>
+        ${r.Disbursed === "Yes" ? `<div class="dtxt">Disbursed: ${rs(r["Disbursed Amount"])}</div>` : ""}`;
     }
-
-    // Loan disbursed Yes/No: only for passed loans
-    const disbursedRow = (st === "Completed" && r.Result === "Passed") ? `
-      <div class="disb">
-        <span>Loan disbursed?</span>
-        <div>
-          <button class="btn sm ${r.Disbursed === "Yes" ? "yes" : "off"}" onclick="disburse('${id}','Yes')">Yes</button>
-          <button class="btn sm ${r.Disbursed === "No" ? "no" : "off"}" onclick="disburse('${id}','No')">No</button>
-        </div>
-      </div>` : "";
-
-    const assign = st === "Completed" ? "" : `
-      <div class="row2">
-        <select id="as-${id}">
-          <option value="">Choose BCM</option>
-          ${bcms.map(b => `<option ${same(b.staff, r["Assigned BCM"]) ? "selected" : ""}>${esc(b.staff)}</option>`).join("")}
-        </select>
-        <button class="btn sm" onclick="assign('${id}')">Assign</button>
-      </div>`;
-
+    const pa = r.Result === "Passed" ? `Passed: ${rs(r["Passed Amount"])}` : "";
+    const rej = r.Result === "Rejected" ? `Reason: ${esc(r["Reject Reason"] || "-")}` : "";
     return `
-      <div class="card ${shown}">
-        <div class="top">
-          <span class="name">${esc(d.cname || r.Client || "-")}</span>
-          <span class="pill ${shown}">${shown}</span>
+      <div class="fcard ${st}">
+        <div class="fhead">
+          <div><b>${esc(cname(r))}</b><small>${esc(mobile(r))}</small></div>
+          <span class="pill p-${st}">${st}</span>
         </div>
-        <div class="small">
-          RO: ${esc(r.Staff || "-")} &nbsp;|&nbsp; ${esc(r.Type || "")} &nbsp;|&nbsp; ${esc(d.product || r.Product || "-")}<br>
-          Center: ${esc(d.center || r.Center || "-")} &nbsp;|&nbsp; Requested: ${money(r["Requested Amount"])}<br>
-          Scheduled: ${fmt(r["Scheduled At"])} &nbsp;|&nbsp; BCM: ${esc(r["Assigned BCM"] || "Not assigned")}
-          ${result}
+        <div class="fline">
+          RO: ${esc(r.Staff || "-")} &nbsp;|&nbsp; Center: ${esc(centerOf(r) || "-")} &nbsp;|&nbsp; Product: ${esc(prodOf(r) || "-")}<br>
+          Requested: ${rs(r["Requested Amount"])} ${pa ? "&nbsp;|&nbsp; " + pa : ""} ${rej ? "&nbsp;|&nbsp; " + rej : ""}<br>
+          BCM: ${esc(assigned || "Not assigned")} &nbsp;|&nbsp; Scheduled: ${fmt(r["Scheduled At"] || det(r).scheduledAt)}
         </div>
-        ${disbursedRow}
-        ${assign}
+        ${action}
       </div>`;
   }
 
@@ -335,249 +626,84 @@
     try {
       const res = await post({ action: "assign", id: id, bcm: bcm });
       if (!res.ok) throw new Error(res.error);
-      await loadAll();
-      render();
+      await loadAll(); render();
     } catch (e) { alert(e.message); }
   }
 
-  async function disburse(id, value) {
+  function showDis(id) {
+    const f = $("df-" + id);
+    const open = f.style.display === "block";
+    document.querySelectorAll(".dform").forEach(x => x.style.display = "none");
+    f.style.display = open ? "none" : "block";
+  }
+
+  async function saveDis(id) {
+    const amt = $("da-" + id).value;
+    if (!amt) { alert("Choose an amount first."); return; }
+    await disburse(id, "Yes", amt);
+  }
+
+  async function disburse(id, value, amount) {
     try {
-      const res = await post({ action: "disburse", id: id, value: value });
+      const res = await post({ action: "disburse", id: id, value: value, amount: amount || 0 });
       if (!res.ok) throw new Error(res.error);
-      await loadAll();
-      render();
+      await loadAll(); render();
     } catch (e) { alert(e.message); }
   }
 
   // ---------- SUMMARY ----------
-  function totals(list) {
-    const t = { files: list.length, grt: 0, pd: 0, open: 0, verified: 0, completed: 0,
-                passed: 0, amt: 0, rejected: 0, disb: 0, disbAmt: 0 };
-    list.forEach(r => {
-      if (r.Type === "GRT") t.grt++; else if (r.Type === "PD") t.pd++;
-      const s = r.Status || "Pending";
-      if (s === "Pending" || s === "Assigned") t.open++;
-      else if (s === "Verified") t.verified++;
-      else if (s === "Completed") t.completed++;
-      if (r.Result === "Passed") {
-        t.passed++;
-        t.amt += Number(r["Passed Amount"]) || 0;
-        if (r.Disbursed === "Yes") { t.disb++; t.disbAmt += Number(r["Passed Amount"]) || 0; }
-      }
-      if (r.Result === "Rejected") t.rejected++;
-    });
-    return t;
-  }
-
-  function groupBy(key) {
-    const g = {};
-    recs.forEach(r => {
-      const k = r[key] || "Not assigned";
-      (g[k] = g[k] || []).push(r);
-    });
-    return g;
-  }
-
   function renderSummary() {
-    const all = totals(recs);
-    const head = `<tr><th>Name</th><th>GRT</th><th>PD</th><th>Open</th><th>Verified</th><th>Done</th><th>Pass</th><th>Rej</th><th>Amount</th><th>Disb</th></tr>`;
-    const row = (name, t) => `<tr>
-      <td><b>${esc(name)}</b></td><td>${t.grt}</td><td>${t.pd}</td><td>${t.open}</td>
-      <td>${t.verified}</td><td>${t.completed}</td><td>${t.passed}</td><td>${t.rejected}</td>
-      <td>${money(t.amt)}</td><td>${t.disb}</td></tr>`;
-    const ros = groupBy("Staff"), bc = groupBy("Assigned BCM");
-
-    $("sumView").innerHTML = `
-      <div class="card">
-        <h2>Branch total</h2>
-        <div class="stats">
-          <div class="stat" style="background:#16a34a"><div class="n">${all.grt}</div><div class="l">GRT</div></div>
-          <div class="stat" style="background:#2563eb"><div class="n">${all.pd}</div><div class="l">PD</div></div>
-          <div class="stat" style="background:#16a34a"><div class="n">${all.passed}</div><div class="l">Passed</div></div>
-          <div class="stat" style="background:#dc2626"><div class="n">${all.rejected}</div><div class="l">Rejected</div></div>
-        </div>
-        <div class="small"><b>Total passed loan amount: ${money(all.amt)}</b><br>
-          <b>Disbursed: ${all.disb} loans, ${money(all.disbAmt)}</b></div>
-      </div>
-      <div class="card">
-        <h2>RO-wise status</h2>
-        <div class="scroll"><table class="tbl">${head}
-          ${Object.keys(ros).map(k => row(k, totals(ros[k]))).join("") || `<tr><td colspan="10">No files</td></tr>`}
-        </table></div>
-      </div>
-      <div class="card">
-        <h2>BCM-wise status</h2>
-        <div class="scroll"><table class="tbl">${head}
-          ${Object.keys(bc).map(k => row(k, totals(bc[k]))).join("") || `<tr><td colspan="10">No files</td></tr>`}
-        </table></div>
-      </div>`;
-  }
-
-  // ---------- RO PERFORMANCE ----------
-  const PERF_FIELDS = [["IGL1", "IGL 1st cycle"], ["IGL2", "IGL 2nd cycle & above"],
-                       ["IL", "IL"], ["MSME", "MSME"], ["GOLD", "Gold loan"]];
-  let perfPeriod = (function () { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); })();
-  let perfData = null;
-
-  function numOf(id) { return parseFloat($(id).value) || 0; }
-
-  async function loadPerf() {
-    const r = await get({ action: "perfget", period: perfPeriod });
-    if (!r.ok) throw new Error(r.error);
-    perfData = r;
-  }
-
-  function changePeriod(v) {
-    if (!v) return;
-    perfPeriod = v;
-    perfData = null;
-    renderPerf();
-  }
-
-  async function renderPerf() {
-    const box = $("perfView");
-    try {
-      if (!perfData || perfData.period !== perfPeriod) await loadPerf();
-    } catch (e) {
-      box.innerHTML = `<div class="card">${esc(e.message)}</div>`;
-      return;
-    }
-    const d = perfData;
-    const tot = d.rows.reduce((t, r) => {
-      t.count += r.count; t.ach += r.achieved; t.tgt += r.target;
-      return t;
-    }, { count: 0, ach: 0, tgt: 0 });
-
-    box.innerHTML = `
-      <div class="card">
-        <h2>RO performance</h2>
-        <label>Month</label>
-        <input type="month" value="${perfPeriod}" onchange="changePeriod(this.value)">
-        <label>Holidays this month (comma separated, e.g. 2026-10-02, 2026-10-20)</label>
-        <input id="perfHol" type="text" value="${esc(d.holidays || "")}">
-        <button class="btn full" onclick="saveHolidays()">Save holidays</button>
-        <div class="stats" style="margin-top:12px">
-          <div class="stat" style="background:#4c1d95"><div class="n">${tot.count}</div><div class="l">Loans</div></div>
-          <div class="stat" style="background:#16a34a"><div class="n">${money(tot.ach)}</div><div class="l">Achieved</div></div>
-          <div class="stat" style="background:#2563eb"><div class="n">${money(tot.tgt)}</div><div class="l">Target</div></div>
-          <div class="stat" style="background:#db2777"><div class="n">${d.balanceDays}</div><div class="l">Balance working days</div></div>
-        </div>
-      </div>
-      ${d.rows.map((ro, i) => roCard(ro, i)).join("") || `<div class="card">No ROs in your branch yet. Add them in the Staff tab.</div>`}`;
-  }
-
-  function roCard(ro, i) {
-    return `
-      <div class="card" style="border-left-color:#4c1d95">
-        <div class="top">
-          <span class="name">${esc(ro.staff)}</span>
-          <span class="small">DRR set: <b>${money(ro.drrPublished)}</b></span>
-        </div>
-        <div class="grid" style="margin-top:8px">
-          ${PERF_FIELDS.map(([k, label]) => `
-            <div><label>${label} - loans</label>
-              <input id="i-${i}-${k}_Count" type="number" inputmode="numeric" value="${ro.products[k].count || ""}" oninput="calcRo(${i})"></div>
-            <div><label>${label} - amount (₹)</label>
-              <input id="i-${i}-${k}_Amt" type="number" inputmode="decimal" value="${ro.products[k].amt || ""}" oninput="calcRo(${i})"></div>`).join("")}
-        </div>
-        <label>Target amount (₹)</label>
-        <input id="i-${i}-Target" type="number" inputmode="decimal" value="${ro.target || ""}" oninput="calcRo(${i})">
-        <div class="calc">
-          <div>Loans: <b id="c-${i}">${ro.count}</b></div>
-          <div>Achieved: <b id="a-${i}">${money(ro.achieved)}</b></div>
-          <div>Balance target: <b id="b-${i}">${money(ro.balance)}</b></div>
-          <div>DRR (auto): <b id="r-${i}">${money(ro.drr)}</b></div>
-        </div>
-        <div class="btns2">
-          <button class="btn sm" onclick="savePerf(${i})">Save</button>
-          <button class="btn sm yes" onclick="publishDrr(${i})">DRR</button>
-        </div>
-        <div class="msg" id="pm-${i}"></div>
-      </div>`;
-  }
-
-  // Recalculate achieved, balance and DRR while typing
-  function calcRo(i) {
-    let count = 0, ach = 0;
-    PERF_FIELDS.forEach(([k]) => { count += numOf(`i-${i}-${k}_Count`); ach += numOf(`i-${i}-${k}_Amt`); });
-    const bal = numOf(`i-${i}-Target`) - ach;
-    const days = perfData ? perfData.balanceDays : 0;
-    const drr = bal > 0 && days > 0 ? Math.round(bal / days * 100) / 100 : 0;
-    $("c-" + i).textContent = count;
-    $("a-" + i).textContent = money(ach);
-    $("b-" + i).textContent = money(bal);
-    $("r-" + i).textContent = money(drr);
-  }
-
-  async function savePerf(i) {
-    const ro = perfData.rows[i];
-    const values = { Target: numOf(`i-${i}-Target`) };
-    PERF_FIELDS.forEach(([k]) => {
-      values[k + "_Count"] = numOf(`i-${i}-${k}_Count`);
-      values[k + "_Amt"] = numOf(`i-${i}-${k}_Amt`);
-    });
-    try {
-      const res = await post({ action: "perfsave", period: perfPeriod, staff: ro.staff, values: values });
-      if (!res.ok) throw new Error(res.error);
-      perfData = null;
-      await renderPerf();
-      if ($("pm-" + i)) { $("pm-" + i).className = "msg ok"; $("pm-" + i).textContent = "Saved"; }
-    } catch (e) { alert(e.message); }
-  }
-
-  // DRR = balance target / balance working days. Publishes it to the RO app.
-  async function publishDrr(i) {
-    const ro = perfData.rows[i];
-    try {
-      const res = await post({ action: "perfdrr", period: perfPeriod, staff: ro.staff });
-      if (!res.ok) throw new Error(res.error);
-      alert("DRR set for " + ro.staff + ": " + money(res.drr) + " per working day. It now shows in the RO app.");
-      perfData = null;
-      await renderPerf();
-    } catch (e) { alert(e.message); }
-  }
-
-  async function saveHolidays() {
-    try {
-      const res = await post({ action: "perfholidays", period: perfPeriod, holidays: $("perfHol").value });
-      if (!res.ok) throw new Error(res.error);
-      perfData = null;
-      await renderPerf();
-    } catch (e) { alert(e.message); }
+    const ros = [...new Set(recs.map(r => r.Staff).filter(Boolean))].sort();
+    const bcmNames = [...new Set(recs.map(r => r["Assigned BCM"]).filter(Boolean))].sort();
+    const line = (name, list) => {
+      const dis = list.filter(r => r.Disbursed === "Yes");
+      return `<tr><td><b>${esc(name)}</b></td><td>${list.length}</td>
+        <td>${list.filter(r => statusOf(r) === "Pending").length}</td>
+        <td>${list.filter(r => statusOf(r) === "Verified").length}</td>
+        <td>${list.filter(r => statusOf(r) === "Passed").length}</td>
+        <td>${list.filter(r => statusOf(r) === "Rejected").length}</td>
+        <td>${dis.length}</td><td>${rs(sumOf(dis, r => r["Disbursed Amount"]))}</td></tr>`;
+    };
+    $("view").innerHTML = `
+      <div class="h2">RO-wise status</div>
+      <div class="tw"><table class="t">
+        <tr><th>RO</th><th>Files</th><th>Pending</th><th>Verified</th><th>Passed</th><th>Rejected</th><th>Disb.</th><th>Amount</th></tr>
+        ${ros.map(n => line(n, recs.filter(r => same(r.Staff, n)))).join("") || `<tr><td colspan="8">No files</td></tr>`}
+      </table></div>
+      <div class="h2">BCM-wise status</div>
+      <div class="tw"><table class="t">
+        <tr><th>BCM</th><th>Files</th><th>Pending</th><th>Verified</th><th>Passed</th><th>Rejected</th><th>Disb.</th><th>Amount</th></tr>
+        ${bcmNames.map(n => line(n, recs.filter(r => same(r["Assigned BCM"], n)))).join("") || `<tr><td colspan="8">No assignments yet</td></tr>`}
+      </table></div>`;
   }
 
   // ---------- STAFF ----------
   function renderStaff() {
-    $("staffView").innerHTML = `
+    $("view").innerHTML = `
       <div class="card">
-        <h2>Staff in ${esc(me.branch)}</h2>
+        <div class="h2">Staff in ${esc(me.branch)}</div>
         ${staffList.map(s => `
-          <div class="staff">
-            <span>${esc(s.staff)} <small>${s.role}</small></span>
-            ${same(s.staff, me.staff) ? "<small>(you)</small>" :
-              `<button class="btn sm del" onclick="removeStaff('${esc(s.staff)}')">Remove</button>`}
+          <div class="srow">
+            <span><b>${esc(s.staff)}</b><small>${s.role}</small></span>
+            ${same(s.staff, me.staff) ? "<small>(you)</small>" : `<button class="rm" onclick="removeStaff('${esc(s.staff)}')">Remove</button>`}
           </div>`).join("") || `<p class="note">No staff yet.</p>`}
       </div>
       <div class="card">
-        <h2>Add RO or BCM</h2>
-        <label>Role</label>
-        <select id="nRole"><option value="RO">RO (Relationship Officer)</option><option value="BCM">BCM</option></select>
-        <label>Name</label>
-        <input id="nStaff" type="text">
-        <label>Password (at least 6 characters)</label>
-        <input id="nPass" type="password">
-        <button class="btn full" onclick="addStaff()">Add</button>
-        <div id="sMsg" class="msg"></div>
+        <div class="h2">Add RO or BCM</div>
+        <label class="fld">Role</label>
+        <select class="fld-in" id="nRole"><option value="RO">RO (Relationship Officer)</option><option value="BCM">BCM</option></select>
+        <label class="fld">Name</label><input class="fld-in" id="nStaff" type="text">
+        <label class="fld">Password (at least 6 characters)</label><input class="fld-in" id="nPass" type="password">
+        <button class="btnFull" onclick="addStaff()">Add</button>
+        <div class="msg" id="sMsg"></div>
       </div>
       <div class="card">
-        <h2>Reset password</h2>
-        <label>Name</label>
-        <input id="rStaff" type="text" list="names">
+        <div class="h2">Reset password</div>
+        <label class="fld">Name</label><input class="fld-in" id="rStaff" type="text" list="names">
         <datalist id="names">${staffList.map(s => `<option value="${esc(s.staff)}">`).join("")}</datalist>
-        <label>New password (at least 6 characters)</label>
-        <input id="rPass" type="password">
-        <button class="btn full" onclick="resetStaff()">Reset password</button>
-        <div id="rMsg" class="msg"></div>
+        <label class="fld">New password (at least 6 characters)</label><input class="fld-in" id="rPass" type="password">
+        <button class="btnFull" onclick="resetStaff()">Reset password</button>
+        <div class="msg" id="rMsg"></div>
       </div>`;
   }
 
@@ -585,10 +711,8 @@
     try {
       const res = await post({ action: "adduser", role: $("nRole").value, staff: $("nStaff").value.trim(), password: $("nPass").value });
       if (!res.ok) throw new Error(res.error);
-      await loadAll();
-      renderStaff();
-      $("sMsg").className = "msg ok";
-      $("sMsg").textContent = "Added. Share the name and password with them.";
+      await loadAll(); renderStaff();
+      $("sMsg").className = "msg ok"; $("sMsg").textContent = "Added. Share the name and password with them.";
     } catch (e) { $("sMsg").className = "msg"; $("sMsg").textContent = e.message; }
   }
 
@@ -596,8 +720,7 @@
     try {
       const res = await post({ action: "resetpass", staff: $("rStaff").value.trim(), password: $("rPass").value });
       if (!res.ok) throw new Error(res.error);
-      $("rMsg").className = "msg ok";
-      $("rMsg").textContent = "Password reset.";
+      $("rMsg").className = "msg ok"; $("rMsg").textContent = "Password reset.";
     } catch (e) { $("rMsg").className = "msg"; $("rMsg").textContent = e.message; }
   }
 
@@ -606,10 +729,113 @@
     try {
       const res = await post({ action: "remove", staff: name });
       if (!res.ok) throw new Error(res.error);
-      await loadAll();
-      renderStaff();
+      await loadAll(); renderStaff();
     } catch (e) { alert(e.message); }
   }
+
+  // ---------- RO PERFORMANCE (targets, daily targets, DRR) ----------
+  function renderPerf() {
+    if (!perf) { $("view").innerHTML = `<div class="card">Loading performance...</div>`; return; }
+    $("view").innerHTML = `
+      <div class="card">
+        <div class="h2">RO performance <small>(${esc(perf.period)})</small></div>
+        <label class="fld">Month</label>
+        <input class="fld-in" type="month" value="${esc(perf.period)}" onchange="changePeriod(this.value)">
+        <label class="fld">Holidays this month (e.g. 2026-10-02, 2026-10-20)</label>
+        <input class="fld-in" id="perfHol" type="text" value="${esc(perf.holidays || "")}">
+        <button class="btnFull" onclick="saveHolidays()">Save holidays</button>
+        <p class="note" style="margin-top:8px">Balance working days: <b>${perf.balanceDays}</b></p>
+      </div>
+      ${perf.rows.map((ro, i) => roPerfCard(ro, i)).join("") || `<div class="card">No ROs in your branch yet. Add them in Staff.</div>`}`;
+  }
+
+  function roPerfCard(ro, i) {
+    return `
+      <div class="card" style="border-left:6px solid #15803d">
+        <div class="fhead"><b>${esc(ro.staff)}</b><small>DRR set: <b>${rs(ro.drrPublished)}</b></small></div>
+        <div class="pgrid" style="margin-top:8px">
+          ${PRODUCTS.map(([k, label]) => `
+            <div><label class="fld">${label} - loans</label><input class="fld-in" id="p-${i}-${k}_Count" type="number" inputmode="numeric" value="${ro.products[k].count || ""}"></div>
+            <div><label class="fld">${label} - amount (₹)</label><input class="fld-in" id="p-${i}-${k}_Amt" type="number" inputmode="decimal" value="${ro.products[k].amt || ""}"></div>`).join("")}
+        </div>
+        <label class="fld">Monthly target (₹)</label><input class="fld-in" id="p-${i}-Target" type="number" inputmode="decimal" value="${ro.target || ""}">
+        <div class="pgrid">
+          <div><label class="fld">Daily GRT target</label><input class="fld-in" id="p-${i}-GRT_Daily" type="number" inputmode="numeric" value="${ro.grtDaily || ""}"></div>
+          <div><label class="fld">Daily PD target</label><input class="fld-in" id="p-${i}-PD_Daily" type="number" inputmode="numeric" value="${ro.pdDaily || ""}"></div>
+        </div>
+        <p class="note" style="margin-top:8px">Achieved: <b>${rs(ro.achieved)}</b> &nbsp;|&nbsp; Balance: <b>${rs(ro.balance)}</b> &nbsp;|&nbsp; DRR (auto): <b>${rs(ro.drr)}</b></p>
+        <div class="pgrid" style="margin-top:8px">
+          <button class="gbtn" onclick="savePerf(${i})">Save</button>
+          <button class="ybtn" style="height:46px" onclick="publishDrr(${i})">DRR</button>
+        </div>
+      </div>`;
+  }
+
+  async function changePeriod(v) {
+    if (!v) return;
+    try {
+      const r = await get({ action: "perfget", period: v });
+      if (!r.ok) throw new Error(r.error);
+      perf = r;
+      renderPerf();
+    } catch (e) { alert(e.message); }
+  }
+
+  async function savePerf(i) {
+    const ro = perf.rows[i];
+    const values = { Target: $("p-" + i + "-Target").value, GRT_Daily: $("p-" + i + "-GRT_Daily").value, PD_Daily: $("p-" + i + "-PD_Daily").value };
+    PRODUCTS.forEach(([k]) => {
+      values[k + "_Count"] = $("p-" + i + "-" + k + "_Count").value;
+      values[k + "_Amt"] = $("p-" + i + "-" + k + "_Amt").value;
+    });
+    try {
+      const res = await post({ action: "perfsave", period: perf.period, staff: ro.staff, values: values });
+      if (!res.ok) throw new Error(res.error);
+      await loadPerf(); renderPerf();
+    } catch (e) { alert(e.message); }
+  }
+
+  async function publishDrr(i) {
+    const ro = perf.rows[i];
+    try {
+      const res = await post({ action: "perfdrr", period: perf.period, staff: ro.staff });
+      if (!res.ok) throw new Error(res.error);
+      alert("DRR set for " + ro.staff + ": " + rs(res.drr) + " per working day. It now shows in the RO app.");
+      await loadPerf(); renderPerf();
+    } catch (e) { alert(e.message); }
+  }
+
+  async function saveHolidays() {
+    try {
+      const res = await post({ action: "perfholidays", period: perf.period, holidays: $("perfHol").value });
+      if (!res.ok) throw new Error(res.error);
+      await loadPerf(); renderPerf();
+    } catch (e) { alert(e.message); }
+  }
+
+  // ---------- MORE ----------
+  function renderMore() {
+    $("view").innerHTML = `
+      <div class="card">
+        <div class="h2">Account</div>
+        <div class="srow"><span>Branch</span><b>${esc(me.branch)}</b></div>
+        <div class="srow"><span>BRM</span><b>${esc(me.staff)}</b></div>
+        <button class="btnFull" onclick="manualSync()">Sync now</button>
+        <button class="btnFull" style="background:#64748b" onclick="logout()">Logout</button>
+      </div>`;
+  }
+
+  // ---------- start: restore a saved login ----------
+  (function restore() {
+    try {
+      const s = JSON.parse(localStorage.getItem("brm_session") || "null");
+      if (s && s.token && s.role === "BRM") {
+        token = s.token;
+        me = { branch: s.branch, staff: s.staff, role: s.role };
+        loadAll().then(startApp).catch(() => localStorage.removeItem("brm_session"));
+      }
+    } catch (e) {}
+  })();
 </script>
 </body>
 </html>
